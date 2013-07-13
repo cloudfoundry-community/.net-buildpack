@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+$stdout.sync = true
+$:.unshift File.expand_path("../../lib", __FILE__)
+
+require 'net_buildpack'
+
+build_dir = ARGV[0]
+
+begin
+  components = NETBuildpack::Buildpack.new(build_dir).detect().compact
+  unless components.empty?
+    puts components.join(', ')
+  else
+    abort
+  end
+rescue => e
+  puts "Detect failed with exception #{e.inspect}, #{e.backtrace}\n"
+  abort e.message
+end
