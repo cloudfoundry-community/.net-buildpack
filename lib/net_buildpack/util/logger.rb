@@ -29,6 +29,9 @@ module NETBuildpack::Util
     LOG_FILE_NAME = 'buildpack.log'.freeze
 
     def self.log(file, title, data = nil)
+      
+      puts "#{time_in_millis}: #{title}\n"
+      
       File.open(file, 'a') do |log|
         log.sync = true
 
