@@ -9,6 +9,7 @@ build_dir = ARGV[0]
 
 begin
   NETBuildpack::Buildpack.new(build_dir).compile
+  puts `cat #{build_dir}/.buildpack-diagnostics/buildpack.log`
 rescue => e
   puts "Compile failed with exception #{e.inspect}, #{e.backtrace}\n"
   abort e.message
