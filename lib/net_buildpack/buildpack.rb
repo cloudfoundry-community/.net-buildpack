@@ -34,17 +34,15 @@ module NETBuildpack
     def detect
 
       ['console']
-
     end
 
-    # Transforms the application directory such that the JRE, container, and frameworks can run the application
+    # Transforms the application directory bundling in all dependancies such that application can be run
     #
     # @return [void]
     def compile
       FileUtils.mkdir_p @lib_directory
 
       @logger.log('TODO - compiling')
-
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
