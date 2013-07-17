@@ -51,7 +51,7 @@ module NETBuildpack
     # @return [String] The payload required to run the application.
     def release
 
-      command = "bin/start"
+      command = "bin/start.sh"
 
       payload = {
           'addons' => [],
