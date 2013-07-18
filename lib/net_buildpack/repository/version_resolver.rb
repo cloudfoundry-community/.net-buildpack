@@ -33,7 +33,7 @@ module NETBuildpack::Repository
     # @raise if no version can be resolved
     def self.resolve(candidate_version, versions)
       tokenized_candidate_version = safe_candidate_version candidate_version
-      tokenized_versions = versions.map { |version| JavaBuildpack::Util::TokenizedVersion.new(version, false) }
+      tokenized_versions = versions.map { |version| NETBuildpack::Util::TokenizedVersion.new(version, false) }
 
       version = tokenized_versions
       .find_all { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
@@ -51,7 +51,7 @@ module NETBuildpack::Repository
       if candidate_version.nil? then
         TOKENIZED_WILDCARD
       else
-        raise "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(JavaBuildpack::Util::TokenizedVersion)
+        raise "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(NETBuildpack::Util::TokenizedVersion)
         candidate_version
       end
     end

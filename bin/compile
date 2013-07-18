@@ -19,6 +19,7 @@ $stdout.sync = true
 $:.unshift File.expand_path("../../lib", __FILE__)
 
 require 'net_buildpack'
+require 'pp'
 
 build_dir = ARGV[0]
 
@@ -26,6 +27,6 @@ begin
   NETBuildpack::Buildpack.new(build_dir).compile
   puts `cat #{build_dir}/.buildpack-diagnostics/buildpack.log`
 rescue => e
-  puts "Compile failed with exception #{e.inspect}, #{e.backtrace}\n"
+  puts "Compile failed with exception #{PP.pp e.inspect}, #{PP.pp e.backtrace}\n"
   abort e.message
 end

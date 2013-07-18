@@ -91,7 +91,7 @@ module NETBuildpack::Runtime
     def self.find_mono(configuration)
       NETBuildpack::Repository::ConfiguredItem.find_item(configuration)
     rescue => e
-      raise RuntimeError, "Mono error: #{e.message}", e.backtrace
+      raise RuntimeError, "Error finding mono version: #{e.message}", e.backtrace
     end
 
     def id(version, profile)

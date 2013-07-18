@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'net_buildpack/util/constantize'
 require 'net_buildpack/util/logger'
 require 'pathname'
 require 'time'
@@ -51,8 +52,8 @@ module NETBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      runtime_detections = Buildpack.component_detections @runtimes
-      raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
+      #runtime_detections = Buildpack.component_detections @runtimes
+      #raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
       ['console']
     end
@@ -99,6 +100,31 @@ module NETBuildpack
 
     def self.component_detections(components)
       components.map { |component| component.detect }.compact
+    end
+
+    def self.configuration(app_dir, type, logger)
+      name = type.match(/^(?:.*::)?(.*)$/)[1].downcase
+      config_file = File.expand_path("../../config/#{name}.yml", File.dirname(__FILE__))
+
+      if File.exists? config_file
+        configuration = YAML.load_file(config_file)
+
+        logger.log(config_file, configuration)
+      end
+
+      configuration || {}
+    end
+
+    def self.configure_context(basic_context, type, logger)
+      configured_context = basic_context.clone
+      configured_context[:configuration] = Buildpack.configuration(configured_context[:app_dir], type, logger)
+      configured_context
+    end
+
+    def self.construct_components(components, component, basic_context, logger)
+      components[component].map do |component|
+        component.constantize.new(Buildpack.configure_context(basic_context, component, logger))
+      end
     end
 
     def self.components(logger)

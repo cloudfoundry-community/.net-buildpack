@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 # Cloud Foundry NET Buildpack
 # Copyright (c) 2013 the original author or authors.
 #
@@ -15,17 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$stdout.sync = true
-$:.unshift File.expand_path("../../lib", __FILE__)
+require 'simplecov'
+SimpleCov.start do
+  add_filter 'spec'
+end
 
-require 'net_buildpack'
-require 'pp'
+require 'tmpdir'
+require 'webmock/rspec'
 
-build_dir = ARGV[0]
-
-begin
-  puts NETBuildpack::Buildpack.new(build_dir).release
-rescue => e
-  puts "Release failed with exception #{PP.pp e.inspect}, #{PP.pp e.backtrace}\n"
-  abort e.message
+RSpec.configure do |config|
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.run_all_when_everything_filtered = true
+  config.filter_run :focus
 end
