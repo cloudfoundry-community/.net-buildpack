@@ -1,0 +1,9 @@
+---
+applications:
+- name: sample_commandline_app
+  buildpack: https://github.com/cloudfoundry-community/.net-buildpack
+  memory: 128M
+  instances: 1
+  host: sample_commandline_app
+  domain: cfapps.io
+  path: .
