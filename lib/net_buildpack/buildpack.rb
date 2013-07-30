@@ -39,10 +39,11 @@ module NETBuildpack
       basic_context = {
           :app_dir => app_dir,
           :lib_directory => @lib_directory,
-          :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY}
+          :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY},
+          :mono_home => ''
       }
 
-       @runtimes = Buildpack.construct_components(components, 'runtimes', basic_context, @logger)
+      @runtimes = Buildpack.construct_components(components, 'runtimes', basic_context, @logger)
 
     end
 
@@ -52,9 +53,18 @@ module NETBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      #runtime_detections = Buildpack.component_detections @runtimes
-      #raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
+      runtime_detections = Buildpack.component_detections @runtimes
+      raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
+     # container_detections = Buildpack.component_detections @containers
+     # raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+
+     # framework_detections = Buildpack.component_detections @frameworks
+
+      # tags = container_detections.empty? ? [] : runtime_detections.concat(framework_detections).concat(container_detections).flatten.compact
+      # @logger.debug { "Detection Tags: #{tags}" }
+      # tags
+      
       ['console']
     end
 

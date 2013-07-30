@@ -37,7 +37,7 @@ module NETBuildpack::Runtime
       @configuration = context[:configuration]
       @diagnostics_directory = context[:diagnostics][:directory] # Note this is a relative directory.
       @version, @uri = Mono.find_mono(@configuration)
-      @profile = configuration[KEY_PROFILE]
+      @profile = @configuration[KEY_PROFILE]
 
       context[:mono_home].concat MONO_HOME
     end
