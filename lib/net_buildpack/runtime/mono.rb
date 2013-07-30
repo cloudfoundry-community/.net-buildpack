@@ -102,10 +102,6 @@ module NETBuildpack::Runtime
       File.join @app_dir, MONO_HOME
     end
 
-    def pre_8
-      @version < JavaBuildpack::Util::TokenizedVersion.new("1.8.0")
-    end
-
   end
 
 end

@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'net_buildpack/container'
 require 'net_buildpack/util/constantize'
 require 'net_buildpack/util/logger'
 require 'pathname'
@@ -44,6 +45,10 @@ module NETBuildpack
       }
 
       @runtimes = Buildpack.construct_components(components, 'runtimes', basic_context, @logger)
+  
+      @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
+  
+    #  @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
 
     end
 
@@ -56,16 +61,15 @@ module NETBuildpack
       runtime_detections = Buildpack.component_detections @runtimes
       raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
-     # container_detections = Buildpack.component_detections @containers
-     # raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+      container_detections = Buildpack.component_detections @containers
+      raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
 
      # framework_detections = Buildpack.component_detections @frameworks
+      framework_detections = []
 
-      # tags = container_detections.empty? ? [] : runtime_detections.concat(framework_detections).concat(container_detections).flatten.compact
-      # @logger.debug { "Detection Tags: #{tags}" }
-      # tags
-      
-      ['console']
+      tags = container_detections.empty? ? [] : runtime_detections.concat(framework_detections).concat(container_detections).flatten.compact
+      @logger.log "Detection Tags: #{tags}" 
+      tags
     end
 
     # Transforms the application directory bundling in all dependancies such that application can be run
@@ -150,15 +154,19 @@ module NETBuildpack
       Pathname.new(File.expand_path('runtime', File.dirname(__FILE__)))
     end
 
+    def self.container_directory
+      Pathname.new(File.expand_path('container', File.dirname(__FILE__)))
+    end
+
     def self.lib_directory(app_dir)
       lib_directory = File.join app_dir, LIB_DIRECTORY
     end
 
     def self.require_component_files
       component_files = runtime_directory.children()
+      component_files.concat container_directory.children
       # component_files.concat framework_directory.children
-      # component_files.concat container_directory.children
-
+      
       component_files.each do |file|
         require file.relative_path_from(root_directory) unless file.directory?
       end

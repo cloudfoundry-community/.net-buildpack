@@ -13,13 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
+# Configuration for the Console container
 ---
-runtimes:
-  - "NETBuildpack::Runtime::Mono"
-containers:
-  - "NETBuildpack::Container::Console"
-# frameworks:
-#   - "JavaBuildpack::Framework::JavaOpts"
-#   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
-#   - "JavaBuildpack::Framework::SpringAutoReconfiguration"

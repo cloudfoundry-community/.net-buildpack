@@ -1,5 +1,5 @@
-# Cloud Foundry NET Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Cloud Foundry .NET Buildpack
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
----
-runtimes:
-  - "NETBuildpack::Runtime::Mono"
-containers:
-  - "NETBuildpack::Container::Console"
-# frameworks:
-#   - "JavaBuildpack::Framework::JavaOpts"
-#   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
-#   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+require 'net_buildpack'
+
+# A module encapsulating all of the container components
+module NETBuildpack::Container
+end
