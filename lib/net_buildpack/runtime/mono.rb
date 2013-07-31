@@ -61,7 +61,6 @@ module NETBuildpack::Runtime
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
-      copy_resources
     end
 
     # ??

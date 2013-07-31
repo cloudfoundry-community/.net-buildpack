@@ -22,14 +22,18 @@ describe 'compile script', :integration do
 	it 'should return zero if success' do
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
+      cache_dir =  File.join Dir.tmpdir, ".net_buildpack_cache_dir"
+      FileUtils.mkdir_p cache_dir
 
-      puts "working in #{root}"
       with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root}") do |stdin, stdout, stderr, wait_thr|
-					 exit_status = wait_thr.value # Process::Status object returned.
+        Open3.popen3("bin/compile #{root} #{cache_dir}") do |stdin, stdout, stderr, wait_thr|
+        	 exit_valud = wait_thr.value
+        	 puts "#{stdout.read}\n#{stderr.read}" # if exit_valud != 0
+        	 expect(exit_valud).to be_success
         end
       end
       puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
+      puts `tree -a #{root}`
     end
   end
 

@@ -77,8 +77,12 @@ module NETBuildpack
     # @return [void]
     def compile
       FileUtils.mkdir_p @lib_directory
+      puts "Compiling..."
 
-      @logger.log('TODO - compiling')
+      runtime.compile
+      container.compile
+      #frameworks.each { |framework| framework.compile }
+      
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -179,5 +183,14 @@ module NETBuildpack
     def runtime
       @runtimes.detect { |runtime| runtime.detect }
     end
+    
+    def container
+      @containers.find { |container| container.detect }
+    end
+
+    # def frameworks
+    #   @frameworks.select { |framework| framework.detect }
+    # end
+
   end
 end
