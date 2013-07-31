@@ -33,7 +33,7 @@ module NETBuildpack::Container
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context = {})
       @app_dir = context[:app_dir]
-      @mono_home = context[:mono_home]
+      @runtime_command = context[:runtime_command]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
     end
@@ -55,11 +55,11 @@ module NETBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      mono_string = File.join @mono_home, 'bin', 'mono'
+      runtime_command = ContainerUtils.space(@runtime_command)
       exe_string = ContainerUtils.space(console_executable)
       arguments_string = ContainerUtils.space(arguments)
 
-      "#{mono_string}#{exe_string}#{arguments_string}"
+      "#{runtime_command}#{exe_string}#{arguments_string}".strip
     end
 
     private
@@ -73,7 +73,9 @@ module NETBuildpack::Container
 
       def console_executable
         exes = Dir.glob(File.join @app_dir, "bin", "*.exe")
-        exes.first  # returns first .exe found, or nil
+        exe = exes.first  # returns first .exe found, or nil
+        exe = exe.sub! "#{@app_dir}/", '' if exe # make it relative
+        exe
       end
 
   end

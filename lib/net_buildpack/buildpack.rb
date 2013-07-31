@@ -41,11 +41,12 @@ module NETBuildpack
           :app_dir => app_dir,
           :lib_directory => @lib_directory,
           :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY},
-          :mono_home => ''
+          :runtime_home => '',
+          :runtime_command => ''
       }
 
       @runtimes = Buildpack.construct_components(components, 'runtimes', basic_context, @logger)
-  
+
       @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
   
     #  @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
@@ -90,8 +91,9 @@ module NETBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
-
-      command = "bin/start.sh"
+      runtime.release
+      command = container.release
+      #frameworks.each { |framework| framework.release }
 
       payload = {
           'addons' => [],

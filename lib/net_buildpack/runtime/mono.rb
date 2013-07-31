@@ -28,8 +28,7 @@ module NETBuildpack::Runtime
     #
     # @param [Hash] context the context that is provided to the instance
     # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :java_home the directory that acts as +JAVA_HOME+
-    # @option context [Array<String>] :java_opts an array that Java options can be added to
+    # @option context [String] :runtime_command the command to launch the runtime
     # @option context [Hash] :configuration the properties provided by the user
     # @option context [Hash] :diagnostics the diagnostics information provided by the buildpack
     def initialize(context)
@@ -39,7 +38,9 @@ module NETBuildpack::Runtime
       @version, @uri = Mono.find_mono(@configuration)
       @profile = @configuration[KEY_PROFILE]
 
-      context[:mono_home].concat MONO_HOME
+      #concat seems to be the way to change the param
+      context[:runtime_home].concat MONO_HOME
+      context[:runtime_command].concat runtime_command 
     end
 
     # Detects which version of Mono this application should use.  *NOTE:* This method will always return _some_ value,
@@ -99,8 +100,14 @@ module NETBuildpack::Runtime
 
     def mono_home
       File.join @app_dir, MONO_HOME
+    end 
+    
+    # Returns the command line to execute the runtime (eg, /app/app/.mono/bin/mono) 
+    #
+    # @return [String]
+    def runtime_command
+      File.join MONO_HOME, 'bin', 'mono'
     end
-
   end
 
 end
