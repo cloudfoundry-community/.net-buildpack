@@ -73,7 +73,7 @@ module NETBuildpack::Runtime
 
     private
 
-    MONO_HOME = '.mono'.freeze
+    MONO_HOME = 'vendor/mono'.freeze
     
     KEY_PROFILE = 'profile'
 
