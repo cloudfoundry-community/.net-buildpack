@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry NET Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,29 +16,20 @@
 
 require 'spec_helper'
 require 'open3'
+require 'tmpdir'
 
-describe 'detect script', :integration do
-
-  it 'should return zero if success' do
+describe 'compile script', :integration do
+	it 'should return zero if success' do
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
-      with_memory_limit('1G') do
-        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-          puts stdout.read if wait_thr.value != 0
-          expect(wait_thr.value).to be_success
-        end
-      end
-    end
-  end
 
-  it 'should fail to detect when no containers detect' do
-     Dir.mktmpdir do |root|
-      FileUtils.cp_r 'spec/fixtures/integration_no_container/.', root
+      puts "working in #{root}"
       with_memory_limit('1G') do
-        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-          expect(wait_thr.value).to_not be_success
+        Open3.popen3("bin/compile #{root}") do |stdin, stdout, stderr, wait_thr|
+					 exit_status = wait_thr.value # Process::Status object returned.
         end
       end
+      puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
     end
   end
 
@@ -50,5 +42,4 @@ describe 'detect script', :integration do
       ENV['MEMORY_LIMIT'] = previous_value
     end
   end
-
 end
