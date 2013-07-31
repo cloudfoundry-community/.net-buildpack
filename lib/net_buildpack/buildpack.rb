@@ -78,7 +78,6 @@ module NETBuildpack
     # @return [void]
     def compile
       FileUtils.mkdir_p @lib_directory
-      puts "Compiling..."
 
       runtime.compile
       container.compile
