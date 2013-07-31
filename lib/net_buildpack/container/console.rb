@@ -74,7 +74,7 @@ module NETBuildpack::Container
       def console_executable
         exes = Dir.glob(File.join @app_dir, "bin", "*.exe")
         exe = exes.first  # returns first .exe found, or nil
-        exe = exe.sub! "#{@app_dir}/", '' if exe # make it relative
+        exe = exe.sub! "#{@app_dir}", '${HOME}' if exe # make it relative
         exe
       end
 

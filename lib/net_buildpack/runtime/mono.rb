@@ -106,7 +106,7 @@ module NETBuildpack::Runtime
     #
     # @return [String]
     def runtime_command
-      File.join MONO_HOME, 'bin', 'mono'
+      File.join '${HOME}', MONO_HOME, 'bin', 'mono'
     end
   end
 
