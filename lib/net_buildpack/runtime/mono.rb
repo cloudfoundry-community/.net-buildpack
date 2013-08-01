@@ -36,7 +36,6 @@ module NETBuildpack::Runtime
       @configuration = context[:configuration]
       @diagnostics_directory = context[:diagnostics][:directory] # Note this is a relative directory.
       @version, @uri = Mono.find_mono(@configuration)
-      @profile = @configuration[KEY_PROFILE]
 
       #concat seems to be the way to change the param
       context[:runtime_home].concat MONO_HOME
@@ -46,9 +45,9 @@ module NETBuildpack::Runtime
     # Detects which version of Mono this application should use.  *NOTE:* This method will always return _some_ value,
     # so it should only be used once that application has already been established to be a Mono application.
     #
-    # @return [String, nil] returns +openjdk-<version>+.
+    # @return [String, nil] returns +mono-<version>+.
     def detect
-      id @version, @profile
+      id @version
     end
 
     # Downloads and unpacks Mono
@@ -74,8 +73,6 @@ module NETBuildpack::Runtime
     private
 
     MONO_HOME = 'vendor/mono'.freeze
-    
-    KEY_PROFILE = 'profile'
 
     def expand(file)
       expand_start_time = Time.now
@@ -94,8 +91,8 @@ module NETBuildpack::Runtime
       raise RuntimeError, "Error finding mono version: #{e.message}", e.backtrace
     end
 
-    def id(version, profile)
-      "mono-#{version}-#{profile}"
+    def id(version)
+      "mono-#{version}"
     end
 
     def mono_home
