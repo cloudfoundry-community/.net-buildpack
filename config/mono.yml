@@ -16,5 +16,5 @@
 # Configuration for Mono repositories
 ---
 repository_root: "https://ci-labs-buildpack-downloads.s3.amazonaws.com/mono/lucid/x86_64"
-version: 3.2.+
+version: 3.2.1
 profile: full
