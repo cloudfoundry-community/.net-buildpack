@@ -65,7 +65,7 @@ module NETBuildpack::Runtime
       print "-----> Downloading Mozilla certificate data"
       NETBuildpack::Util::ApplicationCache.new.get(mozilla_certs_url) do |file|  
         puts "(#{(Time.now - download_start_time).duration})"
-        add_cert_installation_to_startup
+        add_cert_installation_to_startup file
       end
     end
 
