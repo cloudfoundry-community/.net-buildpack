@@ -3,3 +3,4 @@ coverage
 doc
 pkg
 buildpack.log
+spec/fixtures/mem_usage_tests/
