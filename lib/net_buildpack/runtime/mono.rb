@@ -93,8 +93,8 @@ module NETBuildpack::Runtime
 
     def add_cert_installation_to_startup(file)
       FileUtils.move file, mozilla_certs_file
-      system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{setup_mono}"
-      system "chmod +x #{setup_mono}"
+      system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{File.join @app_dir, setup_mono}"
+      system "chmod +x #{File.join @app_dir, setup_mono}"
     end
 
     def self.find_mono(configuration)
