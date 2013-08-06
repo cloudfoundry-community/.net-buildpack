@@ -2,6 +2,6 @@
 applications:
 - name: sample_commandline_app
   buildpack: https://github.com/cloudfoundry-community/.net-buildpack
-  memory: 128M
+  memory: 256
   instances: 1
   path: .
