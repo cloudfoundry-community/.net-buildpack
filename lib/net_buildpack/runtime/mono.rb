@@ -18,6 +18,7 @@ require 'net_buildpack/repository/configured_item'
 require 'net_buildpack/util/application_cache'
 require 'net_buildpack/util/format_duration'
 require 'net_buildpack/util/tokenized_version'
+require "FileUtils"
 
 module NETBuildpack::Runtime
 
@@ -61,6 +62,12 @@ module NETBuildpack::Runtime
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
+
+      print "-----> Downloading Mozilla certificate data"
+      NETBuildpack::Util::ApplicationCache.new.get(mozilla_certs_url) do |file|  
+        puts "(#{(Time.now - download_start_time).duration})"
+        add_cert_installation_to_startup
+      end
     end
 
     # ??
@@ -76,13 +83,20 @@ module NETBuildpack::Runtime
 
     def expand(file)
       expand_start_time = Time.now
-      print "       Expanding Mono to #{MONO_HOME} "
+      print "       expanding Mono to #{MONO_HOME} "
 
       system "rm -rf #{mono_home}"
       system "mkdir -p #{mono_home}"
       system "tar xzf #{file.path} -C #{mono_home} --strip 1 2>&1"
 
       puts "(#{(Time.now - expand_start_time).duration})"
+    end
+
+    def add_cert_installation_to_startup(file)
+      FileUtils.move file, mozilla_certs_file
+      File.open(setup_mono, "a") do |f|     
+        f.write("#{mozroots_exe} --import --sync --file #{mozilla_certs_file}")   
+      end
     end
 
     def self.find_mono(configuration)
@@ -98,13 +112,34 @@ module NETBuildpack::Runtime
     def mono_home
       File.join @app_dir, MONO_HOME
     end 
+
+    def mono_bin
+      File.join MONO_HOME, 'bin', 'mono'
+    end
+
+    def setup_mono
+      File.join MONO_HOME, 'bin', 'setup_mono'
+    end 
+
+    def mozilla_certs_url
+      "http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
+    end
+
+    def mozilla_certs_file
+      File.join mono_home, "mozilla_certsdata.txt"
+    end
+
+    def mozroots_exe
+      File.join MONO_HOME, 'bin', 'mozroots'
+    end
     
     # Returns the command line to execute the runtime (eg, /app/app/.mono/bin/mono) 
     #
     # @return [String]
     def runtime_command
-      File.join MONO_HOME, 'bin', 'mono'
+      "#{setup_mono} && #{mono_bin}"
     end
+
   end
 
 end
