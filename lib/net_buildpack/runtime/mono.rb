@@ -18,7 +18,6 @@ require 'net_buildpack/repository/configured_item'
 require 'net_buildpack/util/application_cache'
 require 'net_buildpack/util/format_duration'
 require 'net_buildpack/util/tokenized_version'
-require "FileUtils"
 
 module NETBuildpack::Runtime
 
