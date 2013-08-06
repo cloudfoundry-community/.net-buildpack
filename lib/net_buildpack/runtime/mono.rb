@@ -93,7 +93,7 @@ module NETBuildpack::Runtime
 
     def add_cert_installation_to_startup(file)
       FileUtils.move file, mozilla_certs_file
-      File.open(setup_mono, "a") do |f|     
+      File.new(setup_mono, "a") do |f|     
         f.write("#{mozroots_exe} --import --sync --file #{mozilla_certs_file}")   
       end
     end
