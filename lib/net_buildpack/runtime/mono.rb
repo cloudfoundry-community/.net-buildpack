@@ -92,7 +92,7 @@ module NETBuildpack::Runtime
     end
 
     def add_cert_installation_to_startup(file)
-      FileUtils.move file, mozilla_certs_file
+      FileUtils.move file, File.join( @app_dir, mozilla_certs_file )
       system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{File.join @app_dir, setup_mono}"
       system "chmod +x #{File.join @app_dir, setup_mono}"
     end
@@ -124,7 +124,7 @@ module NETBuildpack::Runtime
     end
 
     def mozilla_certs_file
-      File.join mono_home, "mozilla_certsdata.txt"
+      File.join MONO_HOME, "mozilla_certsdata.txt"
     end
 
     def mozroots_exe
