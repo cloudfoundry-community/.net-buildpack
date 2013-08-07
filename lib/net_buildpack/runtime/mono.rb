@@ -30,9 +30,11 @@ module NETBuildpack::Runtime
     # @param [Hash] context the context that is provided to the instance
     # @option context [String] :app_dir the directory that the application exists in
     # @option context [String] :runtime_command the command to launch the runtime
+    # @option context [Hash] :config_vars the config vars used to set the environment
     # @option context [Hash] :configuration the properties provided by the user
     # @option context [Hash] :diagnostics the diagnostics information provided by the buildpack
     def initialize(context)
+      @config_vars = context[:config_vars] 
       @app_dir = context[:app_dir]
       @configuration = context[:configuration]
       @diagnostics_directory = context[:diagnostics][:directory] # Note this is a relative directory.
@@ -70,11 +72,18 @@ module NETBuildpack::Runtime
       end
     end
 
-    # ??
+    # Update config_vars
     #
     # @return [void]
     def release
-      
+
+      @config_vars["LD_LIBRARY_PATH"] = "#{runtime_time_absolute_path(mono_lib)}:$LD_LIBRARY_PATH"
+      @config_vars["DYLD_LIBRARY_FALLBACK_PATH"] = "#{runtime_time_absolute_path(mono_lib)}:$DYLD_LIBRARY_FALLBACK_PATH"
+      @config_vars["PKG_CONFIG_PATH"] = "#{runtime_time_absolute_path(File.join(mono_lib,'pkgconfig'))}:$PKG_CONFIG_PATH"
+      @config_vars["C_INCLUDE_PATH"] = "#{runtime_time_absolute_path(File.join(MONO_HOME,'include'))}:$C_INCLUDE_PATH"
+      @config_vars["ACLOCAL_PATH"] = "#{runtime_time_absolute_path(File.join(MONO_HOME,'share','aclocal'))}:$ACLOCAL_PATH"
+      @config_vars["PATH"] = "#{runtime_time_absolute_path(mono_bin)}:$PATH"
+
     end
 
     private
@@ -86,17 +95,17 @@ module NETBuildpack::Runtime
       expand_start_time = Time.now
       print "       expanding Mono to #{MONO_HOME} "
 
-      system "rm -rf #{mono_home}"
-      system "mkdir -p #{mono_home}"
-      system "tar xzf #{file.path} -C #{mono_home} --strip 1 2>&1"
+      system "rm -rf #{stage_time_absolute_path(MONO_HOME)}"
+      system "mkdir -p #{stage_time_absolute_path(MONO_HOME)}"
+      system "tar xzf #{file.path} -C #{stage_time_absolute_path(MONO_HOME)} --strip 1 2>&1"
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
     def add_cert_installation_to_startup(file)
       FileUtils.move file, File.join( @app_dir, mozilla_certs_file )
-      system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{File.join @app_dir, setup_mono}"
-      system "chmod +x #{File.join @app_dir, setup_mono}"
+      system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{stage_time_absolute_path(setup_mono)}"
+      system "chmod +x #{stage_time_absolute_path(setup_mono)}"
     end
 
     def self.find_mono(configuration)
@@ -109,12 +118,20 @@ module NETBuildpack::Runtime
       "mono-#{version}"
     end
 
-    def mono_home
-      File.join @app_dir, MONO_HOME
-    end 
+    def stage_time_absolute_path(path)
+      File.join @app_dir, path
+    end
+
+    def runtime_time_absolute_path(path)
+      File.join "/app", path
+    end
 
     def mono_bin
       File.join MONO_HOME, 'bin', 'mono'
+    end
+
+    def mono_lib
+      File.join MONO_HOME, 'lib' 
     end
 
     def setup_mono
@@ -129,11 +146,11 @@ module NETBuildpack::Runtime
       File.join MONO_HOME, 'bin', 'mozroots'
     end
     
-    # Returns the command line to execute the runtime (eg, /app/app/.mono/bin/mono) 
+    # Returns the command line to execute the runtime
     #
     # @return [String]
     def runtime_command
-      "#{setup_mono} && #{mono_bin}"
+      "#{runtime_time_absolute_path(setup_mono)} && #{runtime_time_absolute_path(mono_bin)}"
     end
 
   end

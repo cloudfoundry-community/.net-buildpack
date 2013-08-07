@@ -19,7 +19,7 @@ require 'open3'
 require 'tmpdir'
 
 describe 'compile script', :integration do
-	it 'should return zero if success' do
+	it 'should return zero if success' do # WARNING.  This takes ages to run the first time since it downloads a 60MB mono runtime tar.gz
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
       cache_dir =  File.join Dir.tmpdir, ".net_buildpack_cache_dir"
@@ -27,13 +27,13 @@ describe 'compile script', :integration do
 
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{cache_dir}") do |stdin, stdout, stderr, wait_thr|
-        	 exit_valud = wait_thr.value
-        	 puts "#{stdout.read}\n#{stderr.read}" # if exit_valud != 0
-        	 expect(exit_valud).to be_success
+        	 exit_value = wait_thr.value
+        	 puts "#{stdout.read}\n#{stderr.read}" if exit_value != 0
+        	 expect(exit_value).to be_success
         end
       end
-      puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
-      puts `tree -a #{root}`
+      # puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
+      # puts `tree -a #{root}`
     end
   end
 

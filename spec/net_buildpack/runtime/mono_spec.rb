@@ -20,7 +20,7 @@ require 'net_buildpack/runtime/mono'
 
 module NETBuildpack::Runtime
 
-  describe Mono, :focus => true do
+  describe Mono do
 
     DETAILS = [NETBuildpack::Util::TokenizedVersion.new('3.2.0'), 'test-uri']
 
@@ -39,6 +39,7 @@ module NETBuildpack::Runtime
             :app_dir => root,
             :runtime_home => '',
             :runtime_command => '',
+            :config_vars => {},
             :diagnostics => {:directory => 'fake-diagnostics-dir'},
             :configuration => {}
         ).detect
@@ -60,98 +61,101 @@ module NETBuildpack::Runtime
             :app_dir => root,
             :runtime_home => '',
             :runtime_command => '',
+            :config_vars => {},
             :diagnostics => {:directory => 'fake-diagnostics-dir'},
             :configuration => {}
         ).compile
 
         mono = File.join(root, 'vendor', 'mono', 'bin', 'mono')
-        puts "mono file is: #{mono}"
         expect(File.exists?(mono)).to be_true
       end
     end
 
-  #   it 'adds the JAVA_HOME to java_home' do
-  #     Dir.mktmpdir do |root|
-  #       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+    it 'should fail when ConfiguredItem.find_item fails' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
+        expect do
+          Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => '',
+            :config_vars => {},
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+          ).detect
+        end.to raise_error(/Error\ finding\ mono\ version:\ test\ error/)
+      end
+    end
 
-  #       java_home = ''
-  #       OpenJdk.new(
-  #           app_dir: '/application-directory',
-  #           java_home: java_home,
-  #           java_opts: [],
-  #           configuration: {}
-  #       )
+    it 'places the downloaded mozilla_certsdata.txt vendor/mono directory' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+        NETBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-mono.tar.gz'))
+        stub_certs_txt = File.join root, 'stub-mozillacertdata.txt' 
+        FileUtils.touch stub_certs_txt
+        application_cache.stub(:get).with(NETBuildpack::Runtime::Mono::MOZILLA_CERTS_URL).and_yield(File.open(stub_certs_txt))
 
-  #       expect(java_home).to eq('.java')
-  #     end
-  #   end
+        detected = Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => '',
+            :config_vars => {},
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+        ).compile
 
-  #   it 'should fail when ConfiguredItem.find_item fails' do
-  #     Dir.mktmpdir do |root|
-  #       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
-  #       expect do
-  #         OpenJdk.new(
-  #             app_dir: '',
-  #             java_home: '',
-  #             java_opts: [],
-  #             configuration: {}
-  #         ).detect
-  #       end.to raise_error(/OpenJDK\ JRE\ error:\ test\ error/)
-  #     end
-  #   end
 
-  #   it 'should add memory options to java_opts' do
-  #     Dir.mktmpdir do |root|
-  #       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-  #       MemoryHeuristicsOpenJDKPre8.stub(:new).and_return(memory_heuristic)
+        mono_certs = File.join(root, 'vendor', 'mono', 'mozilla_certsdata.txt')
+        expect(File.exists?(mono_certs)).to be_true
 
-  #       java_opts = []
-  #       OpenJdk.new(
-  #           app_dir: '/application-directory',
-  #           java_home: '',
-  #           java_opts: java_opts,
-  #           configuration: {}
-  #       ).release
+        mono_setup = File.join(root, 'vendor', 'mono', 'bin', 'setup_mono')
+        expect(File.exists?(mono_setup)).to be_true
+        mono_setup_content = File.read(mono_setup)
+        expect(mono_setup_content).to include("--import --sync --file")
+      end
+    end
 
-  #       expect(java_opts).to include('opt-1')
-  #       expect(java_opts).to include('opt-2')
-  #     end
-  #   end
+    it 'adds setup_mono to run_command' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
 
-  #   it 'adds OnOutOfMemoryError to java_opts' do
-  #     Dir.mktmpdir do |root|
-  #       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        run_command = ""
+        Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => run_command,
+            :config_vars => {},
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+        ).release
 
-  #       java_opts = []
-  #       OpenJdk.new(
-  #           app_dir: root,
-  #           java_home: '',
-  #           java_opts: java_opts,
-  #           configuration: {}
-  #       ).release
+        expect(run_command).to include("setup_mono")
+      end
+    end
 
-  #       expect(java_opts).to include("-XX:OnOutOfMemoryError=./#{JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{OpenJdk::KILLJAVA_FILE_NAME}")
-  #     end
-  #   end
+    it 'adds correct env vars to config_vars ' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
 
-  #   it 'places the killjava script (with appropriately substituted content) in the diagnostics directory' do
-  #     Dir.mktmpdir do |root|
-  #       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-  #       JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-  #       application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-java.tar.gz'))
+        config_vars = {}
+        Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => '',
+            :config_vars => config_vars,
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+        ).release
 
-  #       java_opts = []
-  #       OpenJdk.new(
-  #           app_dir: root,
-  #           java_home: '',
-  #           java_opts: java_opts,
-  #           configuration: {}
-  #       ).compile
-
-  #       killjava_content = File.read(File.join(JavaBuildpack::Diagnostics.get_diagnostic_directory(root), OpenJdk::KILLJAVA_FILE_NAME))
-  #       expect(killjava_content).to include("#{JavaBuildpack::Diagnostics::LOG_FILE_NAME}")
-  #     end
-  #   end
+        expect(config_vars["LD_LIBRARY_PATH"]).to include("/app/vendor/mono/lib")
+        expect(config_vars["DYLD_LIBRARY_FALLBACK_PATH"]).to include("/app/vendor/mono/lib")
+        expect(config_vars["C_INCLUDE_PATH"]).to include("/app/vendor/mono/include")
+        expect(config_vars["ACLOCAL_PATH"]).to include("/app/vendor/mono/share/aclocal")
+        expect(config_vars["PKG_CONFIG_PATH"]).to include("/app/vendor/mono/lib/pkgconfig")
+        expect(config_vars["PATH"]).to include("/app/vendor/mono/bin")
+      end
+    end
 
   end
 

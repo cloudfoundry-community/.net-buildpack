@@ -37,17 +37,18 @@ module NETBuildpack
 
       @lib_directory = Buildpack.lib_directory app_dir
 
-      basic_context = {
+      @context = {
           :app_dir => app_dir,
           :lib_directory => @lib_directory,
           :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY},
           :runtime_home => '',
-          :runtime_command => ''
+          :runtime_command => '',
+          :config_vars => {}
       }
 
-      @runtimes = Buildpack.construct_components(components, 'runtimes', basic_context, @logger)
+      @runtimes = Buildpack.construct_components(components, 'runtimes', @context, @logger)
 
-      @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
+      @containers = Buildpack.construct_components(components, 'containers', @context, @logger)
   
     #  @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
 
@@ -96,7 +97,7 @@ module NETBuildpack
 
       payload = {
           'addons' => [],
-          'config_vars' => {},
+          'config_vars' => @context[:config_vars],
           'default_process_types' => {
               'web' => command
           }

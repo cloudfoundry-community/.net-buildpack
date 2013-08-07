@@ -25,7 +25,9 @@ describe 'release script', :integration do
 
       with_memory_limit('1G') do
         Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
-          expect(wait_thr.value).to be_success
+           exit_value = wait_thr.value
+           puts "#{stdout.read}\n#{stderr.read}" if exit_value != 0
+           expect(exit_value).to be_success
         end
       end
 
