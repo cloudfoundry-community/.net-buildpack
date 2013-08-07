@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'fileutils'
 require 'net_buildpack/runtime'
 require 'net_buildpack/repository/configured_item'
 require 'net_buildpack/util/application_cache'
@@ -63,7 +64,7 @@ module NETBuildpack::Runtime
       end
 
       print "-----> Downloading Mozilla certificate data "
-      NETBuildpack::Util::ApplicationCache.new.get(mozilla_certs_url) do |file|  
+      NETBuildpack::Util::ApplicationCache.new.get(MOZILLA_CERTS_URL) do |file|  
         puts "(#{(Time.now - download_start_time).duration})"
         add_cert_installation_to_startup file
       end
@@ -79,6 +80,7 @@ module NETBuildpack::Runtime
     private
 
     MONO_HOME = 'vendor/mono'.freeze
+    MOZILLA_CERTS_URL = "http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
 
     def expand(file)
       expand_start_time = Time.now
@@ -118,10 +120,6 @@ module NETBuildpack::Runtime
     def setup_mono
       File.join MONO_HOME, 'bin', 'setup_mono'
     end 
-
-    def mozilla_certs_url
-      "http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
-    end
 
     def mozilla_certs_file
       File.join MONO_HOME, "mozilla_certsdata.txt"
