@@ -20,7 +20,7 @@ require 'net_buildpack/container/console'
 
 module NETBuildpack::Container
 
-  describe Console, :focus=>true do
+  describe Console do
 
     it 'should detect when .exe.config exists' do
       detected = Console.new(
@@ -44,63 +44,6 @@ module NETBuildpack::Container
         expect(run_command).to eq('vendor/mono/bin bin/c-Start.exe')
       end
     end
-
-    # it 'should return additional classpath entries when Class-Path is specified' do
-    #   Dir.mktmpdir do |root|
-    #     lib_directory = File.join(root, '.lib')
-    #     Dir.mkdir lib_directory
-
-    #     command = Main.new(
-    #       app_dir: 'spec/fixtures/container_main',
-    #       java_home: 'test-java-home',
-    #       java_opts: [],
-    #       lib_directory: lib_directory,
-    #       configuration: {}
-    #     ).release
-
-    #     expect(command).to eq('test-java-home/bin/java -cp .:alpha.jar:bravo.jar:charlie.jar test-main-class')
-    #   end
-    # end
-
-    # it 'should return command line arguments when they are specified' do
-    #   Dir.mktmpdir do |root|
-    #     lib_directory = File.join(root, '.lib')
-    #     Dir.mkdir lib_directory
-
-    #     command = Main.new(
-    #       app_dir: root,
-    #       java_home: 'test-java-home',
-    #       java_opts: [],
-    #       lib_directory: lib_directory,
-    #       configuration: {
-    #         'java_main_class' => 'test-java-main-class',
-    #         'arguments' => 'some arguments'
-    #       }
-    #     ).release
-
-    #     expect(command).to eq('test-java-home/bin/java -cp . test-java-main-class some arguments')
-    #   end
-    # end
-
-    # it 'should return additional libs when they are specified' do
-    #   Dir.mktmpdir do |root|
-    #     lib_directory = File.join(root, '.lib')
-    #     Dir.mkdir lib_directory
-
-    #     Dir['spec/fixtures/additional_libs/*'].each { |file| system "cp #{file} #{lib_directory}" }
-
-    #     command = Main.new(
-    #       app_dir: root,
-    #       java_home: 'test-java-home',
-    #       java_opts: [],
-    #       lib_directory: lib_directory,
-    #       configuration: { 'java_main_class' => 'test-java-main-class' }
-    #     ).release
-
-    #     expect(command).to eq('test-java-home/bin/java -cp .:.lib/test-jar-1.jar:.lib/test-jar-2.jar test-java-main-class')
-    #   end
-
-    # end
 
   end
 
