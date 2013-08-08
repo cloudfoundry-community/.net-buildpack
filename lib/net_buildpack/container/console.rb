@@ -19,6 +19,8 @@ require 'net_buildpack/container/container_utils'
 
 module NETBuildpack::Container
 
+  class ConsoleExeNotFoundError < RuntimeError; end
+
   # Encapsulates the detect, compile, and release functionality for applications running a simple Console .exe
   # This isn't a _container_ in the traditional sense, but contains the functionality to manage the lifecycle 
   # Console applications.
@@ -72,9 +74,12 @@ module NETBuildpack::Container
       end
 
       def console_executable
-        exes = Dir.glob(File.join @app_dir, "bin", "*.exe")
-        exe = exes.first  # returns first .exe found, or nil
-        exe = exe.sub! "#{@app_dir}/", '' if exe # make it relative
+        exe_configs = Dir.glob(File.join( @app_dir, "**", "*.exe.config" ), File::FNM_CASEFOLD) 
+        exe_config = exe_configs.first  # returns first .exe found, or nil
+        raise(ConsoleExeNotFoundError, "Unable to find any exe.config files in #{@app_dir}") if exe_config.nil?
+
+        exe_config = exe_config.gsub /#{@app_dir}\//, '' # make it relative
+        exe = exe_config.gsub /.config/i, '' # reference the associated exe
         exe
       end
 
