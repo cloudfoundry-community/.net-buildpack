@@ -20,7 +20,7 @@ require 'net_buildpack/container/console'
 
 module NETBuildpack::Container
 
-  describe Console do
+  describe Console, :focus=>true do
 
     it 'should detect when .exe.config exists' do
       detected = Console.new(
@@ -41,7 +41,7 @@ module NETBuildpack::Container
           runtime_command: 'vendor/mono/bin'
         ).release
 
-        expect(run_command).to eq('vendor/mono/bin bin/Start.exe')
+        expect(run_command).to eq('vendor/mono/bin bin/c-Start.exe')
       end
     end
 
