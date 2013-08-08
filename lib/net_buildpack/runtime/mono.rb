@@ -22,7 +22,7 @@ require 'net_buildpack/util/tokenized_version'
 
 module NETBuildpack::Runtime
 
-  # Encapsulates the detect, compile, and release functionality for selecting an OpenJDK JRE.
+  # Encapsulates the detect, compile, and release functionality for selecting an Mono .NET runtime
   class Mono
 
     # Creates an instance, passing in an arbitrary collection of options.
