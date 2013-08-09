@@ -1,5 +1,6 @@
 .net-buildpack
 ==============
+[![Build Status](https://travis-ci.org/cloudfoundry-community/.net-buildpack.png?branch=master)](https://travis-ci.org/cloudfoundry-community/.net-buildpack)
 
 Cloud Foundry buildpack for running .NET applications 
 
