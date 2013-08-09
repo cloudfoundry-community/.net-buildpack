@@ -54,4 +54,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
 </Project>
