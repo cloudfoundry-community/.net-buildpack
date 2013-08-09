@@ -13,14 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
+# Configuration for CLR repositories
 ---
-runtimes:
-  - "NETBuildpack::Runtime::Mono"
-  - "NETBuildpack::Runtime::CLR"
-containers:
-  - "NETBuildpack::Container::Console"
-# frameworks:
-#   - "JavaBuildpack::Framework::JavaOpts"
-#   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
-#   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+version: 4.0.30319

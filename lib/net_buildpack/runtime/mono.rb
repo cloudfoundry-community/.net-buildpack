@@ -15,6 +15,7 @@
 
 require 'fileutils'
 require 'net_buildpack/runtime'
+require 'net_buildpack/runtime/stack'
 require 'net_buildpack/repository/configured_item'
 require 'net_buildpack/util/application_cache'
 require 'net_buildpack/util/format_duration'
@@ -45,11 +46,12 @@ module NETBuildpack::Runtime
       context[:runtime_command].concat runtime_command 
     end
 
-    # Detects which version of Mono this application should use.  *NOTE:* This method will always return _some_ value,
-    # so it should only be used once that application has already been established to be a Mono application.
+    # Detects which version of Mono this application should use.  
+    # Will only return is NOT running on a Windows stack, where the CLR should be used
     #
     # @return [String, nil] returns +mono-<version>+.
     def detect
+      return if NETBuildpack::Runtime::Stack.detect_stack == :windows
       id @version
     end
 

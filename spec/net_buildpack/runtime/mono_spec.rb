@@ -34,6 +34,7 @@ module NETBuildpack::Runtime
     it 'should detect with id of mono-<version>' do
       Dir.mktmpdir do |root|
         NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+        NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:linux)
 
         detected = Mono.new(
             :app_dir => root,
@@ -45,6 +46,22 @@ module NETBuildpack::Runtime
         ).detect
 
         expect(detected).to eq('mono-3.2.0')
+      end
+    end
+
+    it 'should not detect when running on Windows' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+        NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:windows)
+        detected = Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => '',
+            :config_vars => {},
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+          ).detect
+        expect(detected).to be_nil
       end
     end
 
