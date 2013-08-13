@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E554C97C-7656-4C86-922A-18CBDF67B905}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NancyFXSample</RootNamespace>
+    <AssemblyName>NancyFXSample</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="VCAP_APPLICATION" value="{&quot;instance_id&quot;:&quot;16aba5a99c8486f5e4ae18e369e0a743&quot;,&quot;instance_index&quot;:0,&quot;host&quot;:&quot;0.0.0.0&quot;,&quot;port&quot;:61235,&quot;started_at&quot;:&quot;2013-08-09 00:45:28 +0000&quot;,&quot;started_at_timestamp&quot;:1376009128,&quot;start&quot;:&quot;2013-08-09 00:45:28 +0000&quot;,&quot;state_timestamp&quot;:1376009128,&quot;limits&quot;:{&quot;mem&quot;:128,&quot;disk&quot;:1024,&quot;fds&quot;:16384},&quot;application_version&quot;:&quot;2faa5202-34c6-4d3b-8c64-b0027531d05b&quot;,&quot;application_name&quot;:&quot;simple-site&quot;,&quot;application_uris&quot;:[&quot;localhost&quot;],&quot;version&quot;:&quot;2faa5202-34c6-4d3b-8c64-b0027531d05b&quot;,&quot;name&quot;:&quot;simple-site&quot;,&quot;uris&quot;:[&quot;localhost&quot;],&quot;users&quot;:null}" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Nancy">
+      <HintPath>..\packages\Nancy.0.18.0\lib\net40\Nancy.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy.Hosting.Self">
+      <HintPath>..\packages\Nancy.Hosting.Self.0.18.0\lib\net40\Nancy.Hosting.Self.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="CloudFoundry.Mono">
+      <HintPath>..\packages\CloudFoundry.Mono.0.0.0.1\CloudFoundry.Mono.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="app.config" />
+  </ItemGroup>
+</Project>
