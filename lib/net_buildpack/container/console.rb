@@ -76,6 +76,7 @@ module NETBuildpack::Container
       def console_executable
         exe_configs = Dir.glob(File.join( @app_dir, "**", "*.exe.config" ), File::FNM_CASEFOLD) 
         exe_configs = exe_configs.reject{ |f| f[/.*vshost.*/i] } # don't try to run vshost.exe files
+        exe_configs = exe_configs.reject{ |f| f[/.*vendor.*/i] } # shouldn't use any .exe's below vendor/
         exe_config = exe_configs.first  # returns first .exe found, or nil
         raise(ConsoleExeNotFoundError, "Unable to find any exe.config files in #{@app_dir}") if exe_config.nil?
 

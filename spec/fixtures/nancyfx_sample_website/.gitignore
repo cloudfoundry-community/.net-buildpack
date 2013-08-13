@@ -1,0 +1,8 @@
+tmp/
+bin/
+obj/
+*.userprefs
+
+packages/Nancy*
+packages/Newton*
+packages/NUnit*

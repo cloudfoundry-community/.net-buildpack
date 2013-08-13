@@ -38,10 +38,11 @@ module NETBuildpack::Container
         run_command = Console.new(
           app_dir: 'spec/fixtures/integration_valid',
           configuration: { :arguments => '' },
-          runtime_command: 'vendor/mono/bin'
+          runtime_command: '/path/to/mono'
         ).release
 
-        expect(run_command).to eq('vendor/mono/bin bin/c-Start.exe')
+        expect(run_command).to_not include('vendor/mono')
+        expect(run_command).to eq('/path/to/mono z-Start.exe')
       end
     end
 

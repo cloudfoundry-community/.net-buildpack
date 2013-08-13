@@ -26,8 +26,22 @@ describe 'release script', :integration do
       with_memory_limit('1G') do
         Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
-           puts "#{stdout.read}\n#{stderr.read}" if exit_value != 0
+           stdout = stdout.read
+           puts "#{stdout}\n#{stderr.read}" if exit_value != 0
            expect(exit_value).to be_success
+        end
+      end
+    end
+  end 
+
+  it 'should return detect the correct default_process_types' do
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
+           exit_value = wait_thr.value
+           expect(stdout.read).to include('web: /app/vendor/mono/bin/setup_mono && /app/vendor/mono/bin/mono z-Start.exe')
         end
       end
 
