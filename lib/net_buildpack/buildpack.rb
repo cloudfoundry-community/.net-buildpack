@@ -24,7 +24,7 @@ require 'open3'
 
 module NETBuildpack
   class HookError < RuntimeError; end
-  
+
 	# Encapsulates the detection, compile, and release functionality for NET applications
   class Buildpack
 
@@ -133,7 +133,7 @@ module NETBuildpack
            exit_value = wait_thr.value
            output = "#{stdout.read}\n#{stderr.read}"
            @logger.log("#{hook_path(hook_name)}, exit code: #{exit_value}, output: }", output)
-           raise HookError, "Error #{exit_value} running hook: #{hook_path(hook_name)}", e.backtrace if exit_value != 0
+           raise HookError, "Error #{exit_value} running hook: #{hook_path(hook_name)}" if exit_value != 0
         end
       end
       exit_value
