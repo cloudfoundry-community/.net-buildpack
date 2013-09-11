@@ -130,7 +130,7 @@ module NETBuildpack
       if hook_exists?(hook_name) 
         Open3.popen3(hook_path(hook_name)) do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
-           puts "#{stdout.read}\n#{stderr.read}" if exit_value != 0
+           raise "#{stdout.read}\n#{stderr.read}" if exit_value != 0
         end
       end
       exit_value
