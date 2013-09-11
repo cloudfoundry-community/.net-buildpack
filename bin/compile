@@ -30,7 +30,7 @@ rescue => e
   puts "Compile failed with exception #{e.inspect}"
   puts "at: "
   PP.pp e.backtrace
-  puts "cat #{build_dir}/.buildpack-diagnostics/buildpack.log"
+  puts "Buildpack diagnostics log"
   puts `cat #{build_dir}/.buildpack-diagnostics/buildpack.log`
   abort e.message
 end
