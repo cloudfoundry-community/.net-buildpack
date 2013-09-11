@@ -17,6 +17,7 @@
 require 'spec_helper'
 require 'fileutils'
 require 'net_buildpack/runtime/mono'
+require 'open3'
 
 module NETBuildpack
 
@@ -109,8 +110,9 @@ module NETBuildpack
       expect(payload).to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'test-command' } }.to_yaml)
     end
 
-    it 'should load configuration file matching Runtime class name' do
+    it 'should load configuration files matching detected class names' do
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+      File.stub(:exists?).with(/.*buildpack\/hooks.*/).and_return(false)
       File.stub(:exists?).with(File.expand_path('config/stubruntime1.yml')).and_return(true)
       File.stub(:exists?).with(File.expand_path('config/stubruntime2.yml')).and_return(false)
       File.stub(:exists?).with(File.expand_path('config/stubframework1.yml')).and_return(false)
@@ -125,6 +127,64 @@ module NETBuildpack
     xit 'handles exceptions correctly' do
       expect { with_buildpack { |buildpack| raise 'an exception' } }.to raise_error SystemExit
       expect($stderr.string).to match(/an exception/)
+    end
+
+    it 'should call pre_detect and post_detect hook scripts on detect' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+
+      with_buildpack { |buildpack| 
+      	buildpack.should_receive(:run_hook).with("pre_detect").ordered
+      	buildpack.should_receive(:run_hook).with("post_detect").ordered
+
+      	buildpack.detect 
+      }
+    end
+
+    it 'should call pre_compile and post_compile hook scripts on compile' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_framework1.stub(:detect).and_return('stub-framework-1')
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+
+      stub_container1.stub(:compile)
+      stub_framework1.stub(:compile)
+      stub_runtime1.stub(:compile)
+
+      with_buildpack { |buildpack| 
+      	buildpack.should_receive(:run_hook).with("pre_compile").ordered
+      	buildpack.should_receive(:run_hook).with("post_compile").ordered
+
+      	buildpack.compile 
+      }
+    end
+
+    it 'should call pre_release and post_release hook scripts on release' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_framework1.stub(:detect).and_return('stub-framework-1')
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+
+      stub_framework1.stub(:release)
+      stub_runtime1.stub(:release)
+      stub_container1.stub(:release).and_return('test-command')
+
+      with_buildpack { |buildpack| 
+      	buildpack.should_receive(:run_hook).with("pre_release").ordered
+      	buildpack.should_receive(:run_hook).with("post_release").ordered
+
+      	buildpack.release 
+      }
+    end
+
+    #FIXME - need to figure out how to fail is Open3.popen3 isn't called at all
+    it 'should run hook script if it exists' do
+
+      Open3.stub(:popen3).with(/.*\/test-app-dir\/\.buildpack\/hooks\/test_hook$/).and_yield(nil,nil,nil,double(:value => 0))
+
+      with_buildpack { |buildpack| 
+      	buildpack.stub(:hook_exists?).and_return(true)
+      	result = buildpack.send(:run_hook, "test_hook") 
+      	expect(result).to eq(0)
+      }
+
     end
 
     def with_buildpack(&block)
