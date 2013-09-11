@@ -20,8 +20,10 @@ require 'net_buildpack/util/logger'
 require 'pathname'
 require 'time'
 require 'yaml'
+require 'open3'
 
 module NETBuildpack
+  class HookError < RuntimeError; end
 
 	# Encapsulates the detection, compile, and release functionality for NET applications
   class Buildpack
@@ -60,6 +62,8 @@ module NETBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
+      run_hook('pre_detect', {:silent => true})
+
       runtime_detections = Buildpack.component_detections @runtimes
       raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
@@ -68,6 +72,8 @@ module NETBuildpack
 
      # framework_detections = Buildpack.component_detections @frameworks
       framework_detections = []
+
+      run_hook('post_detect', {:silent => true}) 
 
       tags = container_detections.empty? ? [] : runtime_detections.concat(framework_detections).concat(container_detections).flatten.compact
       @logger.log "Detection Tags: #{tags}" 
@@ -80,10 +86,15 @@ module NETBuildpack
     def compile
       FileUtils.mkdir_p @lib_directory
 
+      run_hook('pre_compile')
+
+      run_hook('pre_runtime_compile')
       runtime.compile
+      run_hook('post_runtime_compile')
       container.compile
       #frameworks.each { |framework| framework.compile }
       
+      run_hook('post_compile')
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -91,6 +102,7 @@ module NETBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
+      run_hook('pre_release', {:silent => true})
       runtime.release
       command = container.release
       #frameworks.each { |framework| framework.release }
@@ -105,6 +117,8 @@ module NETBuildpack
 
       @logger.log('Release Payload', payload)
 
+      run_hook('post_release', {:silent => true})
+
       payload
     end
 
@@ -113,6 +127,33 @@ module NETBuildpack
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
 
     LIB_DIRECTORY = '.lib'
+   
+    def run_hook(hook_name, options = {})
+      options[:silent] ||= false
+      exit_value = 0
+      if hook_exists?(hook_name) 
+        hook_start_time = Time.now
+        cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
+        print "-----> Running hook: #{cmd} " unless options[:silent]
+     
+        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+           exit_value = wait_thr.value
+           output = "#{stdout.read}\n#{stderr.read}"
+           @logger.log("#{cmd}, exit code: #{exit_value}, output: }", output)
+           raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
+        end
+        puts "(#{(Time.now - hook_start_time).duration})" unless options[:silent]
+      end
+      exit_value
+    end 
+
+    def hook_exists?(hook_name)
+      return File.exists?(hook_path(hook_name))
+    end 
+
+    def hook_path(hook_name)
+      return File.join(@context[:app_dir], ".buildpack", "hooks", hook_name)
+    end
 
     def self.dump_environment_variables(logger)
       logger.log('Environment Variables', ENV.to_hash)
