@@ -27,7 +27,10 @@ cache_dir = ARGV[1]
 begin
   NETBuildpack::Buildpack.new(build_dir).compile
 rescue => e
-  puts "Compile failed with exception #{e.inspect}, #{e.backtrace}\n"
+  puts "Compile failed with exception #{e.inspect}"
+  puts "at: "
+  PP.pp e.backtrace
+  puts "cat #{build_dir}/.buildpack-diagnostics/buildpack.log"
   puts `cat #{build_dir}/.buildpack-diagnostics/buildpack.log`
   abort e.message
 end
