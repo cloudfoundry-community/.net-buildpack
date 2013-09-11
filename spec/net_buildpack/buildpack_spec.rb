@@ -133,8 +133,8 @@ module NETBuildpack
       stub_container1.stub(:detect).and_return('stub-container-1')
 
       with_buildpack { |buildpack| 
-      	buildpack.should_receive(:run_hook).with("pre_detect").ordered
-      	buildpack.should_receive(:run_hook).with("post_detect").ordered
+      	buildpack.should_receive(:run_hook).with("pre_detect", {:silent => true}).ordered
+      	buildpack.should_receive(:run_hook).with("post_detect", {:silent => true}).ordered
 
       	buildpack.detect 
       }
@@ -151,6 +151,8 @@ module NETBuildpack
 
       with_buildpack { |buildpack| 
       	buildpack.should_receive(:run_hook).with("pre_compile").ordered
+      	buildpack.should_receive(:run_hook).with("pre_runtime_compile").ordered
+      	buildpack.should_receive(:run_hook).with("post_runtime_compile").ordered
       	buildpack.should_receive(:run_hook).with("post_compile").ordered
 
       	buildpack.compile 
@@ -167,8 +169,8 @@ module NETBuildpack
       stub_container1.stub(:release).and_return('test-command')
 
       with_buildpack { |buildpack| 
-      	buildpack.should_receive(:run_hook).with("pre_release").ordered
-      	buildpack.should_receive(:run_hook).with("post_release").ordered
+      	buildpack.should_receive(:run_hook).with("pre_release", {:silent => true}).ordered
+      	buildpack.should_receive(:run_hook).with("post_release", {:silent => true}).ordered
 
       	buildpack.release 
       }
@@ -177,7 +179,7 @@ module NETBuildpack
     #FIXME - need to figure out how to fail is Open3.popen3 isn't called at all
     it 'should run hook script if it exists' do
 
-      Open3.stub(:popen3).with(/.*\/test-app-dir\/\.buildpack\/hooks\/test_hook$/).and_yield(nil,StringIO.new,StringIO.new,double(:value => 0))
+      Open3.stub(:popen3).with(/.*\/test-app-dir\/\.buildpack\/hooks\/test_hook.*/).and_yield(nil,StringIO.new,StringIO.new,double(:value => 0))
 
       with_buildpack { |buildpack| 
       	buildpack.stub(:hook_exists?).and_return(true)
