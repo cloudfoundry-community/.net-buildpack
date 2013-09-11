@@ -88,7 +88,9 @@ module NETBuildpack
 
       run_hook('pre_compile')
 
+      run_hook('pre_runtime_compile')
       runtime.compile
+      run_hook('post_runtime_compile')
       container.compile
       #frameworks.each { |framework| framework.compile }
       
