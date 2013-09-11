@@ -130,7 +130,7 @@ module NETBuildpack
       exit_value = 0
       if hook_exists?(hook_name) 
         cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
-        Open3.popen3() do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
            output = "#{stdout.read}\n#{stderr.read}"
            @logger.log("#{cmd}, exit code: #{exit_value}, output: }", output)
