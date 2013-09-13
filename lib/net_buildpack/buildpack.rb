@@ -156,7 +156,7 @@ module NETBuildpack
     end
 
     def convert_dos_to_unix_line_endings(filename)
-      `tr "\r\n" "\n" < #{filename} > $#{filename}`
+      @logger.log `tr "\r\n" "\n" < #{filename} > $#{filename}`
     end
 
     def self.dump_environment_variables(logger)
