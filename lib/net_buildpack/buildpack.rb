@@ -156,7 +156,7 @@ module NETBuildpack
     end
 
     def convert_dos_to_unix_line_endings(filename)
-      cmd = %{ tr "\\r\\n" "\\n" < #{filename} > $#{filename} }
+      cmd = %{ tr "\\r\\n" "\\n" < #{filename} > #{filename} }
       @logger.log cmd
       @logger.log `#{cmd}`
     end
