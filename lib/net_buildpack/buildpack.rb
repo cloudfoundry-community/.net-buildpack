@@ -159,6 +159,7 @@ module NETBuildpack
       cmd = %{ tr "\\r\\n" "\\n" < #{filename} > #{filename} }
       @logger.log cmd
       @logger.log `#{cmd}`
+      @logger.log `cat #{filename}`
     end
 
     def self.dump_environment_variables(logger)
