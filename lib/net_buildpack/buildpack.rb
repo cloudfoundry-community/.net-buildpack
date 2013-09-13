@@ -155,7 +155,7 @@ module NETBuildpack
       return File.join(@context[:app_dir], ".buildpack", "hooks", hook_name)
     end
 
-    def convert_dos_to_unix_line_endings()
+    def convert_dos_to_unix_line_endings(filename)
       `tr "\r\n" "\n" < #{filename} > $#{filename}`
     end
 
