@@ -133,7 +133,7 @@ module NETBuildpack
       exit_value = 0
       if hook_exists?(hook_name) 
         hook_start_time = Time.now
-        convert_dos_to_unix_line_endings(hook_name)
+        convert_dos_to_unix_line_endings(hook_path(hook_name))
         cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
         print "-----> Running hook: #{cmd} " unless options[:silent]
         Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
