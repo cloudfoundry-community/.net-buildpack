@@ -23,7 +23,7 @@ module NETBuildpack
 
   APP_DIR = 'test-app-dir'.freeze
 
-  describe Buildpack do
+  describe Buildpack , :focus => true do
 
     let(:stub_container1) { double('StubContainer1', detect: nil) }
     let(:stub_container2) { double('StubContainer2', detect: nil) }
@@ -183,6 +183,8 @@ module NETBuildpack
 
       with_buildpack { |buildpack| 
       	buildpack.stub(:hook_exists?).and_return(true)
+      	buildpack.stub(:convert_dos_to_unix_line_endings)
+      	
       	result = buildpack.send(:run_hook, "test_hook") 
       	expect(result).to eq(0)
       }

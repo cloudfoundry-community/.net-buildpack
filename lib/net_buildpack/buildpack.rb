@@ -133,9 +133,9 @@ module NETBuildpack
       exit_value = 0
       if hook_exists?(hook_name) 
         hook_start_time = Time.now
+        convert_dos_to_unix_line_endings(hook_name)
         cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
         print "-----> Running hook: #{cmd} " unless options[:silent]
-     
         Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
            output = "#{stdout.read}\n#{stderr.read}"
@@ -153,6 +153,10 @@ module NETBuildpack
 
     def hook_path(hook_name)
       return File.join(@context[:app_dir], ".buildpack", "hooks", hook_name)
+    end
+
+    def convert_dos_to_unix_line_endings()
+      `tr "\r\n" "\n" < #{filename} > $#{filename}`
     end
 
     def self.dump_environment_variables(logger)
