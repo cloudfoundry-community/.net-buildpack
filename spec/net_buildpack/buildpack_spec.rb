@@ -183,6 +183,8 @@ module NETBuildpack
 
       with_buildpack { |buildpack| 
       	buildpack.stub(:hook_exists?).and_return(true)
+      	buildpack.stub(:convert_dos_to_unix_line_endings)
+
       	result = buildpack.send(:run_hook, "test_hook") 
       	expect(result).to eq(0)
       }
