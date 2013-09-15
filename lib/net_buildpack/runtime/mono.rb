@@ -73,7 +73,7 @@ module NETBuildpack::Runtime
         add_cert_installation_to_startup file
       end
 
-      system "echo 'ln -s #{runtime_time_absolute_path(vendor)} /app/vendor' >> #{stage_time_absolute_path(setup_mono)}"
+      system "echo 'ln -s #{runtime_time_absolute_path("vendor")} /app/vendor' >> #{stage_time_absolute_path(setup_mono)}"
     end
 
     # Update config_vars
