@@ -35,17 +35,18 @@ module NETBuildpack::Util
         end
 		  else
 	  	  require 'pty'
-	  	  logger.log cmd
+	  	  output = "#{cmd} ==>\n\n"
 	  	  puts cmd unless options[:silent]
 			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
 			    begin
 			      stdout_and_err.each do |line| 
-			      	logger.log line
+			      	output += line
 			      	print line unless options[:silent]
 			      end
 			      Process.wait(pid)
 			    rescue Errno::EIO
 			    end
+			    logger.log output
 			  end
 			  exit_value = $?.exitstatus
 			end
