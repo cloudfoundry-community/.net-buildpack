@@ -139,7 +139,7 @@ module NETBuildpack
         print "-----> Running hook: #{cmd} " unless options[:silent]
         exit_value = NETBuildpack::Util::RunCommand.exec(cmd, @logger, {:silent => options[:silent]})
         raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
-        puts "(#{(Time.now - hook_start_time).duration})" unless options[:silent]
+        puts "-> exitcode:#{exit_value} (#{(Time.now - hook_start_time).duration})" unless options[:silent]
       end
       exit_value
     end 

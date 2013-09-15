@@ -179,7 +179,11 @@ module NETBuildpack
     #FIXME - need to figure out how to fail is Open3.popen3 isn't called at all
     it 'should run hook script if it exists' do
 
-      Open3.stub(:popen3).with(/.*\/test-app-dir\/\.buildpack\/hooks\/test_hook.*/).and_yield(nil,StringIO.new,StringIO.new,double(:value => 0))
+    	NETBuildpack::Util::RunCommand.stub(:exec)\
+    		.with(/.*\/test-app-dir\/\.buildpack\/hooks\/test_hook.*/, \
+    				  an_instance_of(NETBuildpack::Util::Logger), \
+    				  be_a(Hash))\
+    		.and_return(0)
 
       with_buildpack { |buildpack| 
       	buildpack.stub(:hook_exists?).and_return(true)

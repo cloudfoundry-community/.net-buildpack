@@ -43,6 +43,7 @@ module NETBuildpack::Util
 			      	logger.log line
 			      	print line unless options[:silent]
 			      end
+			      Process.wait(pid)
 			    rescue Errno::EIO
 			    end
 			  end
