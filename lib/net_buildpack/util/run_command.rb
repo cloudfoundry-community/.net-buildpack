@@ -37,16 +37,16 @@ module NETBuildpack::Util
 	  	  require 'pty'
 	  	  logger.log cmd
 	  	  puts cmd unless options[:silent]
-			  PTY.spawn( cmd ) do |out, in|
+			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
 			    begin
-			      out.each do |line| 
+			      stdout_and_err.each do |line| 
 			      	logger.log line
 			      	print line unless options[:silent]
 			      end
 			    rescue Errno::EIO
 			    end
 			  end
-			  exit_value = $?.to_i
+			  exit_value = $?.exitstatus
 			end
 			return exit_value
 		end
