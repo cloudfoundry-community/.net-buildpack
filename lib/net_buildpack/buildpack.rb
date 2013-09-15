@@ -17,10 +17,11 @@ require 'fileutils'
 require 'net_buildpack/container'
 require 'net_buildpack/util/constantize'
 require 'net_buildpack/util/logger'
+require 'net_buildpack/util/run_command'
 require 'pathname'
 require 'time'
 require 'yaml'
-require 'open3'
+
 
 module NETBuildpack
   class HookError < RuntimeError; end
@@ -136,12 +137,8 @@ module NETBuildpack
         convert_dos_to_unix_line_endings(hook_path(hook_name))
         cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
         print "-----> Running hook: #{cmd} " unless options[:silent]
-        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-           exit_value = wait_thr.value
-           output = "#{stdout.read}\n#{stderr.read}"
-           @logger.log("#{cmd}, exit code: #{exit_value}, output: }", output)
-           raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
-        end
+        exit_value = NETBuildpack::Util::RunCommand.exec(cmd, @logger, {:silent => options[:silent]})
+        raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
         puts "(#{(Time.now - hook_start_time).duration})" unless options[:silent]
       end
       exit_value
