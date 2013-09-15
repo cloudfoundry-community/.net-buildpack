@@ -37,7 +37,7 @@ module NETBuildpack::Util
 	  	  require 'pty'
 	  	  logger.log cmd
 	  	  puts cmd unless options[:silent]
-			  PTY.spawn( cmd ) do |out, in, pid|
+			  PTY.spawn( cmd ) do |out, in|
 			    begin
 			      out.each do |line| 
 			      	logger.log line
