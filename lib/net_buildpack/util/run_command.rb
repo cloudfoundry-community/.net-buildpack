@@ -37,19 +37,24 @@ module NETBuildpack::Util
 	  	  require 'pty'
 	  	  output = "#{cmd} ==>\n\n"
 	  	  puts cmd unless options[:silent]
-			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
-			    begin
-			      stdout_and_err.each do |line| 
-			      	output += line
-			      	print line unless options[:silent]
-			      end
-			      Process.wait(pid)
-			    rescue Exception => exception_msg  
-			    	logger.log "Exception raised with #{exception_msg}.\nReturning exit code 127"
-			    	return 127
-			    end
-			    logger.log output
-			  end
+	  	  begin
+				  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
+				    begin
+				      stdout_and_err.each do |line| 
+				      	output += line
+				      	print line unless options[:silent]
+				      end
+				      Process.wait(pid)
+				    rescue => exception_msg  
+				    	logger.log "#{exception_msg} - exit 127"
+				    	return 127
+				    end
+				    logger.log output
+				  end
+		    rescue Errno::ENOENT
+					logger.log "Errno::ENOENT: No such file or directory - exit 127"
+					return 127
+			  end  	
 			  exit_value = $?.exitstatus
 			end
 			return exit_value
