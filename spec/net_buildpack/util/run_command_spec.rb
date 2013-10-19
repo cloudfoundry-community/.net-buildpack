@@ -19,7 +19,7 @@ require 'net_buildpack/util/run_command'
 
 module NETBuildpack::Util
 
-  describe RunCommand, :focus => true do
+  describe RunCommand do
 
     let(:logger) { double('logger', log: nil) }
 
