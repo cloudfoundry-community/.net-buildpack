@@ -19,7 +19,7 @@ require 'net_buildpack/util/run_command'
 
 module NETBuildpack::Util
 
-  describe RunCommand do
+  describe RunCommand, :focus => true do
 
     let(:logger) { double('logger', log: nil) }
 
@@ -29,7 +29,7 @@ module NETBuildpack::Util
     end
 
     it 'returns an error exit code' do
-      exit_value = NETBuildpack::Util::RunCommand.exec("ls /this/doesnt/exist/foo/bar.baz", logger, { :silent => true })
+      exit_value = NETBuildpack::Util::RunCommand.exec("echo 'Simulating exitcode 1' && exit 1", logger, { :silent => true })
       expect(exit_value).to eq(1)
     end
 
