@@ -44,7 +44,9 @@ module NETBuildpack::Util
 			      	print line unless options[:silent]
 			      end
 			      Process.wait(pid)
-			    rescue Errno::EIO
+			    rescue Exception => exception_msg  
+			    	logger.log "Exception raised with #{exception_msg}.\nReturning exit code 127"
+			    	return 127
 			    end
 			    logger.log output
 			  end
