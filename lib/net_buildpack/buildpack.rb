@@ -108,9 +108,23 @@ module NETBuildpack
       command = container.release
       #frameworks.each { |framework| framework.release }
 
+      #write env vars to profile.d/net_buildpack_env.sh
+      net_buildpack_env = "#ENV vars required by components configured by the .net-buildpack"
+      @context[:config_vars][:BUILDPACK] = ".net-buildpack"
+      @context[:config_vars].each do |key, value|
+        net_buildpack_env = [net_buildpack_env, "\n", "export #{key}=\"#{value}\""].join()
+      end
+      profile_d = File.join(@context[:app_dir], ".profile.d")
+      net_buildpack_env_sh = File.join(profile_d, "net_buildpack_env.sh")
+
+      FileUtils.mkdir_p(profile_d)
+      File.open(net_buildpack_env_sh, 'w') { |f| f.write(net_buildpack_env) }
+
+      @logger.log("#{net_buildpack_env_sh}: ", net_buildpack_env)
+
       payload = {
           'addons' => [],
-          'config_vars' => @context[:config_vars],
+          'config_vars' => {},
           'default_process_types' => {
               'web' => command
           }

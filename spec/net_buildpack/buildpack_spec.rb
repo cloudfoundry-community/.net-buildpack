@@ -110,6 +110,25 @@ module NETBuildpack
       expect(payload).to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'test-command' } }.to_yaml)
     end
 
+    it 'should write config_vars to profile.d/net_buildpack_env.sh during release' do
+      stub_framework1.stub(:detect).and_return('stub-framework-1')
+      stub_framework1.stub(:release).and_return(nil)
+
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_container1.stub(:release).and_return('test-command')
+
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+      stub_runtime1.stub(:release)
+
+      Dir.mktmpdir do |root|
+        buildpack = NETBuildpack::Buildpack.new(File.join(root, APP_DIR))
+        buildpack.release 
+        net_buildpack_env = File.read(File.join(root, APP_DIR, ".profile.d", "net_buildpack_env.sh"))
+
+        expect(net_buildpack_env).to include("export BUILDPACK=\".net-buildpack\"")
+      end
+    end
+
     it 'should load configuration files matching detected class names' do
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
       File.stub(:exists?).with(/.*buildpack\/hooks.*/).and_return(false)
