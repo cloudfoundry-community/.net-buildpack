@@ -17,10 +17,11 @@ require 'fileutils'
 require 'net_buildpack/container'
 require 'net_buildpack/util/constantize'
 require 'net_buildpack/util/logger'
+require 'net_buildpack/util/run_command'
 require 'pathname'
 require 'time'
 require 'yaml'
-require 'open3'
+
 
 module NETBuildpack
   class HookError < RuntimeError; end
@@ -107,9 +108,23 @@ module NETBuildpack
       command = container.release
       #frameworks.each { |framework| framework.release }
 
+      #write env vars to profile.d/net_buildpack_env.sh
+      net_buildpack_env = "#ENV vars required by components configured by the .net-buildpack"
+      @context[:config_vars][:BUILDPACK] = ".net-buildpack"
+      @context[:config_vars].each do |key, value|
+        net_buildpack_env = [net_buildpack_env, "\n", "export #{key}=\"#{value}\""].join()
+      end
+      profile_d = File.join(@context[:app_dir], ".profile.d")
+      net_buildpack_env_sh = File.join(profile_d, "net_buildpack_env.sh")
+
+      FileUtils.mkdir_p(profile_d)
+      File.open(net_buildpack_env_sh, 'w') { |f| f.write(net_buildpack_env) }
+
+      @logger.log("#{net_buildpack_env_sh}: ", net_buildpack_env)
+
       payload = {
           'addons' => [],
-          'config_vars' => @context[:config_vars],
+          'config_vars' => {},
           'default_process_types' => {
               'web' => command
           }
@@ -136,13 +151,9 @@ module NETBuildpack
         convert_dos_to_unix_line_endings(hook_path(hook_name))
         cmd = "#{hook_path(hook_name)} #{@context[:app_dir]}"
         print "-----> Running hook: #{cmd} " unless options[:silent]
-        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-           exit_value = wait_thr.value
-           output = "#{stdout.read}\n#{stderr.read}"
-           @logger.log("#{cmd}, exit code: #{exit_value}, output: }", output)
-           raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
-        end
-        puts "(#{(Time.now - hook_start_time).duration})" unless options[:silent]
+        exit_value = NETBuildpack::Util::RunCommand.exec(cmd, @logger, {:silent => options[:silent]})
+        raise HookError, "Error #{exit_value} running hook: #{cmd}" if exit_value != 0
+        puts "-> exitcode:#{exit_value} (#{(Time.now - hook_start_time).duration})" unless options[:silent]
       end
       exit_value
     end 
