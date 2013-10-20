@@ -28,9 +28,14 @@ module NETBuildpack::Util
       expect(exit_value).to eq(0)
     end
 
-    it 'returns an error exit code' do
-      exit_value = NETBuildpack::Util::RunCommand.exec("ls /this/doesnt/exist/foo/bar.baz", logger, { :silent => true })
+    it 'returns an error exit code for a long running erroring command' do
+      exit_value = NETBuildpack::Util::RunCommand.exec("sleep 0.2 && exit 1", logger, { :silent => true })
       expect(exit_value).to eq(1)
+    end
+
+    it 'returns an error exit code for a short running erroring command' do
+      exit_value = NETBuildpack::Util::RunCommand.exec("exit 2", logger, { :silent => true })
+      expect(exit_value).to eq(2)
     end
 
     it 'streams output from long running processes' do
