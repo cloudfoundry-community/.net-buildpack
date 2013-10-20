@@ -34,8 +34,8 @@ module NETBuildpack::Util
     end
 
     it 'returns an error exit code for a short running erroring command' do
-      exit_value = NETBuildpack::Util::RunCommand.exec("exit 127", logger, { :silent => true })
-      expect(exit_value).to eq(127)
+      exit_value = NETBuildpack::Util::RunCommand.exec("exit 2", logger, { :silent => true })
+      expect(exit_value).to eq(2)
     end
 
     it 'streams output from long running processes' do
