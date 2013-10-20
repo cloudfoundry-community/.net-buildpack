@@ -45,14 +45,19 @@ module NETBuildpack::Util
 	  	  	cmd_file.write(cmd)
 	  	  	cmd_file.close
 	  	  	cmd = cmd_file.path
-	  	  	File.chmod(0777, cmd)
+	  	  	File.chmod(0744, cmd)
 	  	  end
 			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
-		      stdout_and_err.each do |line| 
-		      	output += line
-		      	print line unless options[:silent]
+			  	begin
+			      stdout_and_err.each do |line| 
+			      	output += line
+			      	print line unless options[:silent]
+			      end
+			    rescue Errno::EIO
+			    	#ignore - see http://stackoverflow.com/questions/10238298/ruby-on-linux-pty-goes-away-without-eof-raises-errnoeio
+		      ensure
+		      	Process.wait(pid)
 		      end
-		      Process.wait(pid)
 			  end
 			  logger.log output
 			  exit_value = $?.exitstatus
