@@ -45,7 +45,7 @@ module NETBuildpack::Util
 	  	  	cmd_file.write(cmd)
 	  	  	cmd_file.close
 	  	  	cmd = cmd_file.path
-	  	  	File.chmod(0744, cmd)
+	  	  	File.chmod(0777, cmd)
 	  	  end
 			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
 		      stdout_and_err.each do |line| 
