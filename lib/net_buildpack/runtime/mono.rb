@@ -154,7 +154,7 @@ module NETBuildpack::Runtime
     #
     # @return [String]
     def runtime_command
-      "#{runtime_time_absolute_path(setup_mono)} && #{runtime_time_absolute_path(mono_bin)}"
+      "#{runtime_time_absolute_path(setup_mono)} && #{runtime_time_absolute_path(mono_bin)} --server"
     end
 
   end

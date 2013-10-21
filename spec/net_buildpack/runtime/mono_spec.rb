@@ -151,6 +151,24 @@ module NETBuildpack::Runtime
       end
     end
 
+    it 'runs mono with the --server flag (see http://www.mono-project.com/Release_Notes_Mono_3.2#New_in_Mono_3.2.3)' do
+      Dir.mktmpdir do |root|
+        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+
+        run_command = ""
+        Mono.new(
+            :app_dir => root,
+            :runtime_home => '',
+            :runtime_command => run_command,
+            :config_vars => {},
+            :diagnostics => {:directory => 'fake-diagnostics-dir'},
+            :configuration => {}
+        ).release
+
+        expect(run_command).to include("mono --server")
+      end
+    end
+
     it 'adds correct env vars to config_vars ' do
       Dir.mktmpdir do |root|
         NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
