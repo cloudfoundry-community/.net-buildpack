@@ -42,7 +42,8 @@ module NETBuildpack::Container
     end
 
     def compile 
-      download "current.linux-amd64", "https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego", "forego (Foreman in Go)" do |file|
+      Downloading "-----> Downloading Forego 'current.linux-amd64' from #{FOREGO_URI} "
+      download "current.linux-amd64", FOREGO_URI, "forego (Foreman in Go)" do |file|
         system "chmod +x #{file.path}"
         system "cp #{file.path} #{@lib_directory}/forego"  
       end
@@ -57,6 +58,7 @@ module NETBuildpack::Container
     private
 
     ARGUMENTS_PROPERTY = 'arguments'.freeze
+    FOREGO_URI = 'https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego'.freeze
 
     def arguments
       @configuration[ARGUMENTS_PROPERTY]
