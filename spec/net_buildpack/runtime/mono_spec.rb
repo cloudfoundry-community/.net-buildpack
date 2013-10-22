@@ -20,7 +20,7 @@ require 'net_buildpack/runtime/mono'
 
 module NETBuildpack::Runtime
 
-  describe Mono do
+  describe Mono  do
 
     DETAILS = [NETBuildpack::Util::TokenizedVersion.new('3.2.0'), 'test-uri']
 
@@ -189,6 +189,7 @@ module NETBuildpack::Runtime
         expect(config_vars["ACLOCAL_PATH"]).to include("/app/vendor/mono/share/aclocal")
         expect(config_vars["PKG_CONFIG_PATH"]).to include("/app/vendor/mono/lib/pkgconfig")
         expect(config_vars["PATH"]).to include("/app/vendor/mono/bin")
+        expect(config_vars["RUNTIME_COMMAND"]).to include("/app/vendor/mono/bin/mono")
       end
     end
 

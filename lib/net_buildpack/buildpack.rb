@@ -69,6 +69,8 @@ module NETBuildpack
       raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
       container_detections = Buildpack.component_detections @containers
+      #Procfile container overrides all other container detections
+      container_detections = Buildpack.select_container_if_exists("net-procfile", container_detections)
       raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
 
      # framework_detections = Buildpack.component_detections @frameworks
@@ -179,6 +181,12 @@ module NETBuildpack
 
     def self.component_detections(components)
       components.map { |component| component.detect }.compact
+    end
+
+    #reduce container_array to named container if exists, otherwise return passed in containers 
+    def self.select_container_if_exists(container_name, all_containers)
+      procfile_containers = all_containers.select { |container| container == "#{container_name}" }
+      procfile_containers.size > 0 ? procfile_containers : all_containers
     end
 
     def self.configuration(app_dir, type, logger)
