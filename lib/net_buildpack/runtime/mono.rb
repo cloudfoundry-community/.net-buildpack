@@ -67,6 +67,7 @@ module NETBuildpack::Runtime
         expand file
       end
 
+      download_start_time = Time.now
       print "-----> Downloading Mozilla certificate data "
       NETBuildpack::Util::ApplicationCache.new.get(MOZILLA_CERTS_URL) do |file|  
         puts "(#{(Time.now - download_start_time).duration})"

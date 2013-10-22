@@ -42,8 +42,10 @@ module NETBuildpack::Container
     end
 
     def compile 
-      Downloading "-----> Downloading Forego 'current.linux-amd64' from #{FOREGO_URI} "
-      download "current.linux-amd64", FOREGO_URI, "forego (Foreman in Go)" do |file|
+      download_start_time = Time.now
+      puts "-----> Downloading Forego 'current.linux-amd64' from #{FOREGO_URI} "
+      NETBuildpack::Util::ApplicationCache.new.get(FOREGO_URI) do |file|  
+        puts "(#{(Time.now - download_start_time).duration})"
         system "chmod +x #{file.path}"
         system "cp #{file.path} #{@lib_directory}/forego"  
       end
