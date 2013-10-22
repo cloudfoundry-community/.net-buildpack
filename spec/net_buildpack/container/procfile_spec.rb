@@ -40,7 +40,7 @@ module NETBuildpack::Container
             lib_directory: lib_directory
         ).release
 
-        expect(command).to include('./vendor/forego start -p $PORT')
+        expect(command).to include('/app/vendor/forego start -p $PORT')
       end
     end
 

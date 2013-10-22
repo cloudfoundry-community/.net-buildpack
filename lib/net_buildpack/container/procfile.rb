@@ -47,12 +47,13 @@ module NETBuildpack::Container
       NETBuildpack::Util::ApplicationCache.new.get(FOREGO_URI) do |file|  
         puts "(#{(Time.now - download_start_time).duration})"
         system "chmod +x #{file.path}"
-        system "cp #{file.path} #{@lib_directory}/forego"  
+        system "mkdir -p #{stage_time_absolute_path('vendor')}"
+        system "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}"  
       end
     end
 
     def release
-      foreman_string = "#{relative_lib_directory}/forego start -p $PORT"
+      foreman_string = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
 
       "#{foreman_string}"
     end
@@ -76,8 +77,12 @@ module NETBuildpack::Container
       filepath
     end
 
-    def relative_lib_directory
-      @lib_directory.sub! "#{@app_dir}/", './'
+    def stage_time_absolute_path(path)
+      File.join @app_dir, path
+    end
+
+    def runtime_time_absolute_path(path)
+      File.join "/app", path
     end
 
   end
