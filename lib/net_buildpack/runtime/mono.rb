@@ -89,6 +89,7 @@ module NETBuildpack::Runtime
       @config_vars["ACLOCAL_PATH"] = "#{runtime_time_absolute_path(File.join(MONO_HOME,'share','aclocal'))}:$ACLOCAL_PATH"
       @config_vars["PATH"] = "#{runtime_time_absolute_path(mono_bin)}:$PATH"
       @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
+      @config_vars["XDG_CONFIG_HOME"] = "#{runtime_time_absolute_path('vendor')}"
 
     end
 
