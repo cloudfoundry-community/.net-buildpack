@@ -42,7 +42,7 @@ module NETBuildpack::Util
 	  	  #Wrap bash commands in a script so that PTY.spawn will run them.
 	  	  unless File.exists?(cmd)
 	  	  	cmd_file = Tempfile.new('net_buildpack_run_command.sh')
-	  	  	cmd_file.write("#!/bin/bash\n")
+	  	  	cmd_file.write("#!/usr/bin/env bash\n")
 	  	  	cmd_file.write(cmd)
 	  	  	cmd_file.close
 	  	  	cmd = cmd_file.path
