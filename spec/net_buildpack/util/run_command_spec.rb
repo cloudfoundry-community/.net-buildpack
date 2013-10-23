@@ -43,6 +43,14 @@ module NETBuildpack::Util
       expect(exit_value).to eq(0)
     end
 
+    it 'can be run with a custom ENV' do
+      logger.should_receive(:log) do |msg|
+        msg.should include('BAR')
+      end
+
+      exit_value = NETBuildpack::Util::RunCommand.exec("echo $FOO", logger, { :silent => true, :env => {"FOO" => "BAR"} })
+      expect(exit_value).to eq(0)
+    end
 
   end
 

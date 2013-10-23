@@ -20,7 +20,7 @@ require 'net_buildpack/runtime/mono'
 
 module NETBuildpack::Runtime
 
-  describe Mono  do
+  describe Mono do
 
     DETAILS = [NETBuildpack::Util::TokenizedVersion.new('3.2.0'), 'test-uri']
 
@@ -29,11 +29,16 @@ module NETBuildpack::Runtime
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
+
+      NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+      NETBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+      application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-mono.tar.gz'))
+        
     end
 
     it 'should detect with id of mono-<version>' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+        
         NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:linux)
 
         detected = Mono.new(
@@ -51,7 +56,7 @@ module NETBuildpack::Runtime
 
     it 'should not detect when running on Windows' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
+        
         NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:windows)
         detected = Mono.new(
             :app_dir => root,
@@ -67,13 +72,7 @@ module NETBuildpack::Runtime
 
     it 'should extract Mono from a GZipped TAR' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
-        NETBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-mono.tar.gz'))
-        stub_certs_txt = File.join root, 'stub-mozillacertdata.txt' 
-        FileUtils.touch stub_certs_txt
-        application_cache.stub(:get).with(NETBuildpack::Runtime::Mono::MOZILLA_CERTS_URL).and_yield(File.open(stub_certs_txt))
-
+        
         detected = Mono.new(
             :app_dir => root,
             :runtime_home => '',
@@ -104,14 +103,16 @@ module NETBuildpack::Runtime
       end
     end
 
-    it 'places the downloaded mozilla_certsdata.txt vendor/mono directory' do
+    it 'runs mozroots with XDG_CONFIG_HOME set correctly' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
-        NETBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-mono.tar.gz'))
-        stub_certs_txt = File.join root, 'stub-mozillacertdata.txt' 
-        FileUtils.touch stub_certs_txt
-        application_cache.stub(:get).with(NETBuildpack::Runtime::Mono::MOZILLA_CERTS_URL).and_yield(File.open(stub_certs_txt))
+
+        NETBuildpack::Util::RunCommand.stub(:exec) do |cmd, logger, options|
+        cmd.should include('mozroots')
+        cmd.should include('--import')
+        cmd.should include('--sync')
+        options[:env].should include('HOME'=>root, 'XDG_CONFIG_HOME' => '$HOME')
+        0
+        end
 
         detected = Mono.new(
             :app_dir => root,
@@ -121,39 +122,11 @@ module NETBuildpack::Runtime
             :diagnostics => {:directory => 'fake-diagnostics-dir'},
             :configuration => {}
         ).compile
-
-
-        mono_certs = File.join(root, 'vendor', 'mono', 'mozilla_certsdata.txt')
-        expect(File.exists?(mono_certs)).to be_true
-
-        mono_setup = File.join(root, 'vendor', 'mono', 'bin', 'setup_mono')
-        expect(File.exists?(mono_setup)).to be_true
-        mono_setup_content = File.read(mono_setup)
-        expect(mono_setup_content).to include("--import --sync --file")
-      end
-    end
-
-    it 'adds setup_mono to run_command' do
-      Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
-
-        run_command = ""
-        Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => run_command,
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
-        ).release
-
-        expect(run_command).to include("setup_mono")
       end
     end
 
     it 'runs mono with the --server flag (see http://www.mono-project.com/Release_Notes_Mono_3.2#New_in_Mono_3.2.3)' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
 
         run_command = ""
         Mono.new(
@@ -171,7 +144,6 @@ module NETBuildpack::Runtime
 
     it 'adds correct env vars to config_vars ' do
       Dir.mktmpdir do |root|
-        NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
 
         config_vars = {}
         Mono.new(
@@ -183,13 +155,14 @@ module NETBuildpack::Runtime
             :configuration => {}
         ).release
 
-        expect(config_vars["LD_LIBRARY_PATH"]).to include("/app/vendor/mono/lib")
-        expect(config_vars["DYLD_LIBRARY_FALLBACK_PATH"]).to include("/app/vendor/mono/lib")
-        expect(config_vars["C_INCLUDE_PATH"]).to include("/app/vendor/mono/include")
-        expect(config_vars["ACLOCAL_PATH"]).to include("/app/vendor/mono/share/aclocal")
-        expect(config_vars["PKG_CONFIG_PATH"]).to include("/app/vendor/mono/lib/pkgconfig")
-        expect(config_vars["PATH"]).to include("/app/vendor/mono/bin")
-        expect(config_vars["RUNTIME_COMMAND"]).to include("/app/vendor/mono/bin/mono")
+        expect(config_vars["LD_LIBRARY_PATH"]).to include("$HOME/vendor/mono/lib")
+        expect(config_vars["DYLD_LIBRARY_FALLBACK_PATH"]).to include("$HOME/vendor/mono/lib")
+        expect(config_vars["C_INCLUDE_PATH"]).to include("$HOME/vendor/mono/include")
+        expect(config_vars["ACLOCAL_PATH"]).to include("$HOME/vendor/mono/share/aclocal")
+        expect(config_vars["PKG_CONFIG_PATH"]).to include("$HOME/vendor/mono/lib/pkgconfig")
+        expect(config_vars["PATH"]).to include("$HOME/vendor/mono/bin")
+        expect(config_vars["RUNTIME_COMMAND"]).to include("$HOME/vendor/mono/bin/mono")
+        expect(config_vars["XDG_CONFIG_HOME"]).to include("$HOME")
       end
     end
 

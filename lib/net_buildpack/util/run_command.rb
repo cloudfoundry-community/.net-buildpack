@@ -24,11 +24,12 @@ module NETBuildpack::Util
 
 		def self.exec(cmd, logger, options = {})
 			options[:silent] ||= false
+			options[:env] ||= {}
 			exit_value = 0
 			is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
 			if is_windows then 
 			  require 'open3'
-     	  Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+     	  Open3.popen3(options[:env], cmd) do |stdin, stdout, stderr, wait_thr|
           exit_value = wait_thr.value.to_i
           output = "#{cmd}, exit code: #{exit_value}, output: #{stdout.read}\n#{stderr.read}"
           logger.log output
@@ -47,7 +48,7 @@ module NETBuildpack::Util
 	  	  	cmd = cmd_file.path
 	  	  	File.chmod(0744, cmd)
 	  	  end
-			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
+			  PTY.spawn(options[:env], cmd ) do |stdout_and_err, stdin, pid| 
 			  	begin
 			      stdout_and_err.each do |line| 
 			      	output += line
