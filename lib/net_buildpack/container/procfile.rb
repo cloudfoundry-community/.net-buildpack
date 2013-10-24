@@ -34,9 +34,9 @@ module NETBuildpack::Container
 
     def compile 
       download("current.linux-amd64", FOREGO_URI) do |file| 
-        sh "chmod +x #{file.path}"
-        sh "mkdir -p #{stage_time_absolute_path('vendor')}"
-        sh "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}"  
+        sh "chmod +x #{file.path}", {:silent => true}
+        sh "mkdir -p #{stage_time_absolute_path('vendor')}", {:silent => true}
+        sh "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}", {:silent => true}
       end
     end
 
