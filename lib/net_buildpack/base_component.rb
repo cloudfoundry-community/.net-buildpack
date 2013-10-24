@@ -104,6 +104,19 @@ module NETBuildpack
       NETBuildpack::Util::RunCommand.exec(cmd, @logger, options)
     end
 
+    # Replace strings in a file.  Modified the original file
+    #
+    # @param [String] filepath
+    # @param [String] old_value 
+    # @param [String] new_value 
+    def replace_in_file(filepath, old_value, new_value)
+      IO.write(filepath, File.open(filepath) do |f|
+                            f.read.gsub(/#{old_value}/, new_value)
+                          end 
+      )
+    end
+
+
   end
 
 end

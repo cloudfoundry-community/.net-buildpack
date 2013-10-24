@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'net_buildpack/base_component'
 require 'net_buildpack/container'
 require 'net_buildpack/container/container_utils'
 
@@ -21,7 +22,7 @@ module NETBuildpack::Container
 
   # Encapsulates the detect, compile, and release functionality for NET applications whose start command is embedded in a Procfile
   # This isn't a _container_ in the traditional sense, but contains the functionality to manage a set of .NET applications working together
-  class Procfile 
+  class Procfile < NETBuildpack::BaseComponent
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -53,6 +54,11 @@ module NETBuildpack::Container
     end
 
     def release
+
+      #otherwise CF runtime will use the web: element as the start command 
+      #rather than the 'forego start' command we specify
+      replace_in_file(find_file("Procfile"),"web:","_web:")
+
       foreman_string = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
 
       "#{foreman_string}"

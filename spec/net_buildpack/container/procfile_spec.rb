@@ -32,6 +32,8 @@ module NETBuildpack::Container
 
     it 'should return command' do
       Dir.mktmpdir do |root|
+        procfile = create_procfile
+        
         lib_directory = File.join(root, 'vendor')
         Dir.mkdir lib_directory
 
@@ -44,6 +46,24 @@ module NETBuildpack::Container
       end
     end
 
+    #otherwise CF runtime will use the web: element as the start command rather than the 'forego start' command we specify
+    it 'web: element in Procfile should be changed to _web:' do
+      Dir.mktmpdir do |root|
+        procfile = create_procfile
+
+        command = Procfile.new(
+            app_dir: root
+        ).release
+
+        expect(File.read(procfile)).to eq('_web: mono --server myapp-web.exe')
+      end
+    end
+
+    def create_procfile
+      procfile = File.join root, 'Procfile'
+      File.open(procfile, 'w') { |f| f.write("web: mono --server myapp-web.exe")}
+      procfile
+    end
   end
 
 end

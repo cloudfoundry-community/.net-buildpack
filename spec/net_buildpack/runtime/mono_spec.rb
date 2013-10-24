@@ -107,11 +107,17 @@ module NETBuildpack::Runtime
       Dir.mktmpdir do |root|
 
         NETBuildpack::Util::RunCommand.stub(:exec) do |cmd, logger, options|
-        cmd.should include('mozroots')
-        cmd.should include('--import')
-        cmd.should include('--sync')
-        options[:env].should include('HOME'=>root, 'XDG_CONFIG_HOME' => '$HOME')
-        0
+            case cmd
+            when /ln.+/i
+                cmd.should include('-s')
+                cmd.should include("#{root}/vendor /app/vendor")
+            when /.*mozroots.*/i
+                cmd.should include('mozroots')
+                cmd.should include('--import')
+                cmd.should include('--sync')
+                options[:env].should include('HOME'=>root, 'XDG_CONFIG_HOME' => '$HOME/.config')
+            end
+            0
         end
 
         detected = Mono.new(
