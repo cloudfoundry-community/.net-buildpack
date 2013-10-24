@@ -100,7 +100,7 @@ module NETBuildpack
     #
     # @param [String] cmd the shell script to run
     # @param [Hash] options { :silent => true/false }
-    def sh(cmd, options)
+    def sh(cmd, options = {})
       NETBuildpack::Util::RunCommand.exec(cmd, @logger, options)
     end
 
@@ -116,6 +116,13 @@ module NETBuildpack
       )
     end
 
+    def stage_time_absolute_path(path)
+      File.join @app_dir, path
+    end
+
+    def runtime_time_absolute_path(path)
+      File.join "/app", path
+    end
 
   end
 

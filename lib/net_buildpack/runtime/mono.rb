@@ -104,14 +104,6 @@ module NETBuildpack::Runtime
       "mono-#{version}"
     end
 
-    def stage_time_absolute_path(path)
-      File.join @app_dir, path
-    end
-
-    def runtime_time_absolute_path(path)
-      File.join "/app", path
-    end
-
     def mono_bin
       File.join MONO_HOME, 'bin'
     end

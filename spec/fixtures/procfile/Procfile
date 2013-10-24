@@ -1,2 +1,2 @@
-web: $RUNTIME_COMMAND bin/myapp-web.exe -port $PORT
-worker: $RUNTIME_COMMAND bin/myapp-worker.exe
+web: mono bin/myapp-web.exe -port $PORT
+worker: mono bin/myapp-worker.exe

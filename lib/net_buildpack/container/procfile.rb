@@ -24,18 +24,8 @@ module NETBuildpack::Container
   # This isn't a _container_ in the traditional sense, but contains the functionality to manage a set of .NET applications working together
   class Procfile < NETBuildpack::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :mono_home the directory that acts as +MONO_HOME+
-    # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context = {})
-      @app_dir = context[:app_dir]
-      @runtime_command = context[:runtime_command]
-      @lib_directory = context[:lib_directory]
-      @configuration = context[:configuration]
+    def initialize(context)
+      super('Procfile container', context)
     end
 
     def detect
@@ -43,13 +33,10 @@ module NETBuildpack::Container
     end
 
     def compile 
-      download_start_time = Time.now
-      puts "-----> Downloading Forego 'current.linux-amd64' from #{FOREGO_URI} "
-      NETBuildpack::Util::ApplicationCache.new.get(FOREGO_URI) do |file|  
-        puts "(#{(Time.now - download_start_time).duration})"
-        system "chmod +x #{file.path}"
-        system "mkdir -p #{stage_time_absolute_path('vendor')}"
-        system "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}"  
+      download("current.linux-amd64", FOREGO_URI) do |file| 
+        sh "chmod +x #{file.path}"
+        sh "mkdir -p #{stage_time_absolute_path('vendor')}"
+        sh "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}"  
       end
     end
 
@@ -66,12 +53,7 @@ module NETBuildpack::Container
 
     private
 
-    ARGUMENTS_PROPERTY = 'arguments'.freeze
     FOREGO_URI = 'https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego'.freeze
-
-    def arguments
-      @configuration[ARGUMENTS_PROPERTY]
-    end
 
     def id
       'net-procfile'
@@ -81,14 +63,6 @@ module NETBuildpack::Container
       filepath = File.join(@app_dir, filename)
       filepath = File.exists?(filepath) ? filepath : nil
       filepath
-    end
-
-    def stage_time_absolute_path(path)
-      File.join @app_dir, path
-    end
-
-    def runtime_time_absolute_path(path)
-      File.join "/app", path
     end
 
   end
