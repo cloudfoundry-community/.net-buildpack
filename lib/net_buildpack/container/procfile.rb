@@ -38,14 +38,13 @@ module NETBuildpack::Container
         sh "mkdir -p #{stage_time_absolute_path('vendor')}", {:silent => true}
         sh "cp #{file.path} #{stage_time_absolute_path('vendor/forego')}", {:silent => true}
       end
-    end
-
-    def release
 
       #otherwise CF runtime will use the web: element as the start command 
       #rather than the 'forego start' command we specify
       replace_in_file(find_file("Procfile"),"web:","_web:")
+    end
 
+    def release
       foreman_string = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
 
       "#{foreman_string}"
