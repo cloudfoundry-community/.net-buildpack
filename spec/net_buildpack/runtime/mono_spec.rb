@@ -162,7 +162,7 @@ module NETBuildpack::Runtime
         expect(config_vars["PKG_CONFIG_PATH"]).to include("$HOME/vendor/mono/lib/pkgconfig")
         expect(config_vars["PATH"]).to include("/usr/local/bin:/usr/bin:/bin:$HOME/vendor/mono/bin")
         expect(config_vars["RUNTIME_COMMAND"]).to include("$HOME/vendor/mono/bin/mono")
-        expect(config_vars["XDG_CONFIG_HOME"]).to include("$HOME")
+        expect(config_vars["XDG_CONFIG_HOME"]).to include("$HOME/.config")
       end
     end
 

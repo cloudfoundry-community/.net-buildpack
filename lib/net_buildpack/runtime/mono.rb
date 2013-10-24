@@ -80,7 +80,7 @@ module NETBuildpack::Runtime
       @config_vars["ACLOCAL_PATH"] = "$HOME/#{File.join(MONO_HOME,'share','aclocal')}:$ACLOCAL_PATH"
       @config_vars["PATH"] = "/usr/local/bin:/usr/bin:/bin:$HOME/#{mono_bin}:$PATH"
       @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
-      @config_vars["XDG_CONFIG_HOME"] = "$HOME"
+      @config_vars["XDG_CONFIG_HOME"] = "$HOME/.config"
     end
 
     def expand(file)
