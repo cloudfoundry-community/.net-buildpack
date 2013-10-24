@@ -26,6 +26,8 @@ module NETBuildpack::Util
 			options[:silent] ||= false
 			options[:env] ||= {}
 			exit_value = 0
+			output = "With ENV:\n#{options[:env].inspect}\n\nexec '#{cmd}':\n\n"
+	  	puts cmd unless options[:silent]
 			is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
 			if is_windows then 
 			  require 'open3'
@@ -37,8 +39,6 @@ module NETBuildpack::Util
         end
 		  else
 	  	  require 'pty'
-	  	  output = "#{cmd} ==>\n\n"
-	  	  puts cmd unless options[:silent]
 	  	  #Wrap bash commands in a script so that PTY.spawn will run them.
 	  	  unless File.exists?(cmd)
 	  	  	cmd_file = Tempfile.new('net_buildpack_run_command.sh')
