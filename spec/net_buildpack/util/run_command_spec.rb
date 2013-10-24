@@ -61,6 +61,15 @@ module NETBuildpack::Util
       expect(exit_value).to eq(0)
     end
 
+    it 'custom ENV vars can reference themselves' do
+      logger.should_receive(:log) do |msg|
+        msg.should include('ENV1:ONE,$ENV1')
+      end
+
+      exit_value = NETBuildpack::Util::RunCommand.exec("echo ENV1:$ENV1", logger, { :silent => true, :env => {"ENV1" => "ONE,$ENV1"} })
+      expect(exit_value).to eq(0)
+    end
+
   end
 
 end

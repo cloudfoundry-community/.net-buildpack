@@ -26,11 +26,11 @@ module NETBuildpack::Util
   
   	# Expands variables that contain other variables in the hash.
   	#
-  	# eg:  expand_variables { "HOME"=>"/home/foo", "CONFIG"=>"$HOME/config"}
-  	#  => { "HOME"=>"/home/foo", "CONFIG"=>"/home/foo/config"}
+  	# eg:  expand_variables { "HOME"=>"/home/foo", "CONFIG"=>"$HOME/config", "PATH"=>"/new/path:$PATH"}
+  	#  => { "HOME"=>"/home/foo", "CONFIG"=>"/home/foo/config", "PATH"=>"/new/path:$PATH"}
 	  def self.expand_variables(env)
 	  	env.merge(env) do |key,value| 
-	  		value.gsub(VARIABLES_REGEX) { env[$1] } 	
+	  		value.gsub(VARIABLES_REGEX) { $1==key ? "$#{key}" : env[$1] } 	
 	  	end
 	  end
 
