@@ -46,7 +46,8 @@ module NETBuildpack
           :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY},
           :runtime_home => '',
           :runtime_command => '',
-          :config_vars => {}
+          :config_vars => {},
+          :logger => @logger
       }
 
       @runtimes = Buildpack.construct_components(components, 'runtimes', @context, @logger)
@@ -256,7 +257,7 @@ module NETBuildpack
         container_list = Buildpack.component_detections(container_detections).join(', ')
         raise "Application can be run by more than one container: #{container_list}"
       end
-      
+
       container_detections
     end
 
