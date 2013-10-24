@@ -22,9 +22,22 @@ module NETBuildpack::Util
   # Run external shell commands, both streaming and logging output
   class RunCommand
 
+  	VARIABLES_REGEX = /\$([a-zA-Z_]+[a-zA-Z0-9_]*)|\$\{(.+)\}/
+  
+  	# Expands variables that contain other variables in the hash.
+  	#
+  	# eg:  expand_variables { "HOME"=>"/home/foo", "CONFIG"=>"$HOME/config"}
+  	#  => { "HOME"=>"/home/foo", "CONFIG"=>"/home/foo/config"}
+	  def self.expand_variables(env)
+	  	env.merge(env) do |key,value| 
+	  		value.gsub(VARIABLES_REGEX) { env[$1] } 	
+	  	end
+	  end
+
 		def self.exec(cmd, logger, options = {})
 			options[:silent] ||= false
 			options[:env] ||= {}
+			options[:env] = expand_variables options[:env]
 			exit_value = 0
 			output = "With ENV:\n#{options[:env].inspect}\n\nexec '#{cmd}':\n\n"
 	  	puts cmd unless options[:silent]
