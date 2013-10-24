@@ -71,7 +71,7 @@ module NETBuildpack::Runtime
     private
 
     MONO_HOME = 'vendor/mono'.freeze
-    
+
     def set_mono_config_vars
       @config_vars["LD_LIBRARY_PATH"] = "$HOME/#{mono_lib}:$LD_LIBRARY_PATH"
       @config_vars["DYLD_LIBRARY_FALLBACK_PATH"] = "$HOME/#{mono_lib}:$DYLD_LIBRARY_FALLBACK_PATH"
@@ -113,7 +113,7 @@ module NETBuildpack::Runtime
     end
 
     def mono_bin
-      File.join MONO_HOME, 'bin', 'mono'
+      File.join MONO_HOME, 'bin'
     end
 
     def mono_lib
@@ -128,7 +128,7 @@ module NETBuildpack::Runtime
     #
     # @return [String]
     def runtime_command
-      "$HOME/#{mono_bin} --server"
+      "$HOME/#{mono_bin}/mono --server"
     end
 
   end
