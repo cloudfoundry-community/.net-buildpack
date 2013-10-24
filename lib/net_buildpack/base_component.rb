@@ -76,7 +76,7 @@ module NETBuildpack
     def time_operation(&block)
       start_time = Time.now
       yield 
-      puts "(#{(Time.now - start_time).duration})"
+      puts " (#{(Time.now - start_time).duration})"
     end
 
     # Downloads an item with the given name and version from the given URI, then yields the resultant file to the given
