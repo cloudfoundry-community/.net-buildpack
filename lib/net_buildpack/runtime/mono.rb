@@ -56,7 +56,6 @@ module NETBuildpack::Runtime
 
       time_operation do
         puts "-----> Installing Mozilla certificate data to .config/.mono/certs"
-        sh "/usr/bin/env", {:env => @config_vars}
         sh "ln -s #{stage_time_absolute_path("vendor")} /app/vendor", {:env => @config_vars}
         sh "#{stage_time_absolute_path(mozroots_exe)} --import --sync", {:env => @config_vars}
       end
@@ -72,8 +71,7 @@ module NETBuildpack::Runtime
     private
 
     MONO_HOME = 'vendor/mono'.freeze
-    MOZILLA_CERTS_URL = "http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
-
+    
     def set_mono_config_vars
       @config_vars["LD_LIBRARY_PATH"] = "$HOME/#{mono_lib}:$LD_LIBRARY_PATH"
       @config_vars["DYLD_LIBRARY_FALLBACK_PATH"] = "$HOME/#{mono_lib}:$DYLD_LIBRARY_FALLBACK_PATH"
