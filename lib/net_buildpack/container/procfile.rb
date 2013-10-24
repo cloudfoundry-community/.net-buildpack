@@ -41,7 +41,10 @@ module NETBuildpack::Container
 
       #otherwise CF runtime will use the web: element as the start command 
       #rather than the 'forego start' command we specify
-      replace_in_file(find_file("Procfile"),"web:","_web:")
+      time_operation "Patching Procfile to rename web: to _web:" do
+        replace_in_file(find_file("Procfile"),"web:","_web:")
+      end
+      
     end
 
     def release

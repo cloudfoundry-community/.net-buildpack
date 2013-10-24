@@ -54,8 +54,7 @@ module NETBuildpack::Runtime
       @config_vars["HOME"] = @app_dir
       set_mono_config_vars
 
-      time_operation do
-        print "-----> Installing Mozilla certificate data to .config/.mono/certs"
+      time_operation "Installing Mozilla certificate data to .config/.mono/certs" do
         sh "ln -s #{stage_time_absolute_path("vendor")} /app/vendor", {:silent => true, :env => @config_vars}
         sh "#{stage_time_absolute_path(mozroots_exe)} --import --sync", {:silent => true, :env => @config_vars}
       end

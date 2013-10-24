@@ -22,6 +22,11 @@ module NETBuildpack::Container
 
   describe Procfile do
 
+    before do
+      $stdout = StringIO.new
+      $stderr = StringIO.new
+    end
+
     it 'should detect with Procfile' do
       detected = Procfile.new(
           app_dir: 'spec/fixtures/procfile'
@@ -30,9 +35,8 @@ module NETBuildpack::Container
       expect(detected).to be_true
     end
 
-    it 'should return command' do
+    it 'should return forego command' do
       Dir.mktmpdir do |root|
-        procfile = create_procfile root
 
         lib_directory = File.join(root, 'vendor')
         Dir.mkdir lib_directory
@@ -51,9 +55,13 @@ module NETBuildpack::Container
       Dir.mktmpdir do |root|
         procfile = create_procfile root
 
-        command = Procfile.new(
+        container = Procfile.new(
             app_dir: root
-        ).release
+        )
+
+        container.stub(:download) #just ignore
+
+        container.compile
 
         expect(File.read(procfile)).to eq('_web: mono --server myapp-web.exe')
       end

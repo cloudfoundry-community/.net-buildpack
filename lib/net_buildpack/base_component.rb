@@ -73,8 +73,9 @@ module NETBuildpack
     # Times an operation
     #
     # @return [void]
-    def time_operation(&block)
+    def time_operation(description, &block)
       start_time = Time.now
+      print "-----> #{description}"
       yield 
       puts " (#{(Time.now - start_time).duration})"
     end
