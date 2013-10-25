@@ -41,7 +41,7 @@ describe 'release script', :integration do
       with_memory_limit('1G') do
         Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
-           expect(stdout.read).to include('web: /app/vendor/mono/bin/setup_mono && /app/vendor/mono/bin/mono --server z-Start.exe')
+           expect(stdout.read).to include('web: $HOME/vendor/mono/bin/mono --server z-Start.exe')
         end
       end
 

@@ -18,8 +18,9 @@ require 'spec_helper'
 require 'open3'
 require 'tmpdir'
 
+# WARNING.  This takes ages to run the *first* time since it downloads a 60MB mono runtime tar.gz
 describe 'compile script', :integration do
-	it 'should return zero if success' do # WARNING.  This takes ages to run the first time since it downloads a 60MB mono runtime tar.gz
+	it 'should return zero if success' do 
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
       cache_dir =  File.join Dir.tmpdir, ".net_buildpack_cache_dir"
@@ -34,6 +35,24 @@ describe 'compile script', :integration do
       end
       # puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
       # puts `tree -a #{root}`
+    end
+  end
+
+  it 'should successfully compile an app with a Procfile container' do 
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/procfile/.', root
+      cache_dir =  File.join Dir.tmpdir, ".net_buildpack_cache_dir"
+      FileUtils.mkdir_p cache_dir
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/compile #{root} #{cache_dir}") do |stdin, stdout, stderr, wait_thr|
+           exit_value = wait_thr.value
+           puts "#{stdout.read}\n#{stderr.read}" if exit_value != 0
+           expect(exit_value).to be_success
+        end
+      end
+      #puts `cat #{root}/.buildpack-diagnostics/buildpack.log`
+      #puts `tree -a #{root}`
     end
   end
 

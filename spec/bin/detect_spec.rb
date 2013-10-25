@@ -41,6 +41,22 @@ describe 'detect script', :integration do
     end
   end
 
+  it 'should handle Procfile' do
+     Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/procfile/.', root
+      with_memory_limit('1G') do
+        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+          exit_code = wait_thr.value
+          result = stdout.read
+          puts result if exit_code != 0
+          expect(wait_thr.value).to be_success
+          expect(result).to include("net-procfile")
+          expect(result).to_not include("console")
+        end
+      end
+    end
+  end
+
   def with_memory_limit(memory_limit)
     previous_value = ENV['MEMORY_LIMIT']
     begin

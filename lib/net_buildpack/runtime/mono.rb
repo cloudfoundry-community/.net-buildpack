@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'net_buildpack/base_component'
 require 'net_buildpack/runtime'
 require 'net_buildpack/runtime/stack'
 require 'net_buildpack/repository/configured_item'
@@ -24,26 +25,15 @@ require 'net_buildpack/util/tokenized_version'
 module NETBuildpack::Runtime
 
   # Encapsulates the detect, compile, and release functionality for selecting an Mono .NET runtime
-  class Mono
+  class Mono < NETBuildpack::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :runtime_command the command to launch the runtime
-    # @option context [Hash] :config_vars the config vars used to set the environment
-    # @option context [Hash] :configuration the properties provided by the user
-    # @option context [Hash] :diagnostics the diagnostics information provided by the buildpack
     def initialize(context)
-      @config_vars = context[:config_vars] 
-      @app_dir = context[:app_dir]
-      @configuration = context[:configuration]
-      @diagnostics_directory = context[:diagnostics][:directory] # Note this is a relative directory.
+      super('Mono runtime', context)
       @version, @uri = Mono.find_mono(@configuration)
 
       #concat seems to be the way to change the param
       context[:runtime_home].concat MONO_HOME
-      context[:runtime_command].concat runtime_command 
+      context[:runtime_command].concat runtime_command
     end
 
     # Detects which version of Mono this application should use.  
@@ -59,41 +49,38 @@ module NETBuildpack::Runtime
     #
     # @return [void]
     def compile
-      download_start_time = Time.now
-      print "-----> Downloading Mono #{@version} from #{@uri} "
+      download(@version, @uri) { |file| expand file }
 
-      NETBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO Use global cache #50175265
-        puts "(#{(Time.now - download_start_time).duration})"
-        expand file
+      @config_vars["HOME"] = @app_dir
+      set_mono_config_vars
+
+      time_operation "Installing Mozilla certificate data to .config/.mono/certs" do
+        sh "ln -s #{stage_time_absolute_path("vendor")} /app/vendor", {:silent => true, :env => @config_vars}
+        sh "#{stage_time_absolute_path(mozroots_exe)} --import --sync", {:silent => true, :env => @config_vars}
       end
-
-      print "-----> Downloading Mozilla certificate data "
-      NETBuildpack::Util::ApplicationCache.new.get(MOZILLA_CERTS_URL) do |file|  
-        puts "(#{(Time.now - download_start_time).duration})"
-        add_cert_installation_to_startup file
-      end
-
-      system "echo 'ln -s #{runtime_time_absolute_path("vendor")} /app/vendor' >> #{stage_time_absolute_path(setup_mono)}"
-    end
+  end
 
     # Update config_vars
     #
     # @return [void]
     def release
-
-      @config_vars["LD_LIBRARY_PATH"] = "#{runtime_time_absolute_path(mono_lib)}:$LD_LIBRARY_PATH"
-      @config_vars["DYLD_LIBRARY_FALLBACK_PATH"] = "#{runtime_time_absolute_path(mono_lib)}:$DYLD_LIBRARY_FALLBACK_PATH"
-      @config_vars["PKG_CONFIG_PATH"] = "#{runtime_time_absolute_path(File.join(mono_lib,'pkgconfig'))}:$PKG_CONFIG_PATH"
-      @config_vars["C_INCLUDE_PATH"] = "#{runtime_time_absolute_path(File.join(MONO_HOME,'include'))}:$C_INCLUDE_PATH"
-      @config_vars["ACLOCAL_PATH"] = "#{runtime_time_absolute_path(File.join(MONO_HOME,'share','aclocal'))}:$ACLOCAL_PATH"
-      @config_vars["PATH"] = "#{runtime_time_absolute_path(mono_bin)}:$PATH"
-
+      set_mono_config_vars
     end
 
     private
 
     MONO_HOME = 'vendor/mono'.freeze
-    MOZILLA_CERTS_URL = "http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
+
+    def set_mono_config_vars
+      @config_vars["LD_LIBRARY_PATH"] = "$HOME/#{mono_lib}:$LD_LIBRARY_PATH"
+      @config_vars["DYLD_LIBRARY_FALLBACK_PATH"] = "$HOME/#{mono_lib}:$DYLD_LIBRARY_FALLBACK_PATH"
+      @config_vars["PKG_CONFIG_PATH"] = "$HOME/#{File.join(mono_lib,'pkgconfig')}:$PKG_CONFIG_PATH"
+      @config_vars["C_INCLUDE_PATH"] = "$HOME/#{File.join(MONO_HOME,'include')}:$C_INCLUDE_PATH"
+      @config_vars["ACLOCAL_PATH"] = "$HOME/#{File.join(MONO_HOME,'share','aclocal')}:$ACLOCAL_PATH"
+      @config_vars["PATH"] = "/usr/local/bin:/usr/bin:/bin:$HOME/#{mono_bin}:$PATH"
+      @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
+      @config_vars["XDG_CONFIG_HOME"] = "$HOME/.config"
+    end
 
     def expand(file)
       expand_start_time = Time.now
@@ -106,12 +93,6 @@ module NETBuildpack::Runtime
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def add_cert_installation_to_startup(file)
-      FileUtils.move file, File.join( @app_dir, mozilla_certs_file )
-      system "echo '#{mozroots_exe} --import --sync --file #{mozilla_certs_file}' >> #{stage_time_absolute_path(setup_mono)}"
-      system "chmod +x #{stage_time_absolute_path(setup_mono)}"
-    end
-
     def self.find_mono(configuration)
       NETBuildpack::Repository::ConfiguredItem.find_item(configuration)
     rescue => e
@@ -122,28 +103,12 @@ module NETBuildpack::Runtime
       "mono-#{version}"
     end
 
-    def stage_time_absolute_path(path)
-      File.join @app_dir, path
-    end
-
-    def runtime_time_absolute_path(path)
-      File.join "/app", path
-    end
-
     def mono_bin
-      File.join MONO_HOME, 'bin', 'mono'
+      File.join MONO_HOME, 'bin'
     end
 
     def mono_lib
       File.join MONO_HOME, 'lib' 
-    end
-
-    def setup_mono
-      File.join MONO_HOME, 'bin', 'setup_mono'
-    end 
-
-    def mozilla_certs_file
-      File.join MONO_HOME, "mozilla_certsdata.txt"
     end
 
     def mozroots_exe
@@ -154,7 +119,7 @@ module NETBuildpack::Runtime
     #
     # @return [String]
     def runtime_command
-      "#{runtime_time_absolute_path(setup_mono)} && #{runtime_time_absolute_path(mono_bin)} --server"
+      "$HOME/#{mono_bin}/mono --server"
     end
 
   end

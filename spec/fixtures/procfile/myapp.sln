@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "myapp-web", "myapp-web\myapp-web.csproj", "{E554C97C-7656-4C86-922A-18CBDF67B905}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{9C9D4872-55D0-4E3F-AF8D-3427AB039ECE}"
+	ProjectSection(SolutionItems) = preProject
+		manifest.yml = manifest.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "myapp-worker", "myapp-worker\myapp-worker.csproj", "{A2D558B7-C5F8-4598-8633-5FF9180123F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2D558B7-C5F8-4598-8633-5FF9180123F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D558B7-C5F8-4598-8633-5FF9180123F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D558B7-C5F8-4598-8633-5FF9180123F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D558B7-C5F8-4598-8633-5FF9180123F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E554C97C-7656-4C86-922A-18CBDF67B905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E554C97C-7656-4C86-922A-18CBDF67B905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E554C97C-7656-4C86-922A-18CBDF67B905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E554C97C-7656-4C86-922A-18CBDF67B905}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = myapp-web\myapp-web.csproj
+	EndGlobalSection
+EndGlobal

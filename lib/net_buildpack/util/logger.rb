@@ -64,4 +64,10 @@ module NETBuildpack::Util
 
   end
 
+  class NullLogger
+    def log(title, data = nil)
+      #no-op
+    end
+  end
+
 end

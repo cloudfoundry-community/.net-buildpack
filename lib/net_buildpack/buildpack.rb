@@ -46,12 +46,15 @@ module NETBuildpack
           :diagnostics => {:directory => NETBuildpack::Util::Logger::DIAGNOSTICS_DIRECTORY},
           :runtime_home => '',
           :runtime_command => '',
-          :config_vars => {}
+          :config_vars => {},
+          :logger => @logger
       }
 
       @runtimes = Buildpack.construct_components(components, 'runtimes', @context, @logger)
 
       @containers = Buildpack.construct_components(components, 'containers', @context, @logger)
+
+      @logger.log @containers
   
     #  @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
 
@@ -68,8 +71,7 @@ module NETBuildpack
       runtime_detections = Buildpack.component_detections @runtimes
       raise "Application can be run using more than one Runtime: #{runtime_detections.join(', ')}" if runtime_detections.size > 1
 
-      container_detections = Buildpack.component_detections @containers
-      raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+      container_detections = Buildpack.component_detections(detect_containers)
 
      # framework_detections = Buildpack.component_detections @frameworks
       framework_detections = []
@@ -245,8 +247,28 @@ module NETBuildpack
       @runtimes.detect { |runtime| runtime.detect }
     end
     
+    def detect_containers
+      container_detections = @containers.select { |container| container.detect }
+
+      #Procfile container overrides all other container detections
+      container_detections = select_container_if_exists(NETBuildpack::Container::Procfile, container_detections)
+
+      if container_detections.size > 1
+        container_list = Buildpack.component_detections(container_detections).join(', ')
+        raise "Application can be run by more than one container: #{container_list}"
+      end
+
+      container_detections
+    end
+
+    #reduce container_array to named container if exists, otherwise return passed in containers 
+    def select_container_if_exists(container_class, all_containers)
+      pruned_containers = all_containers.select { |container| container.class == container_class }
+      pruned_containers.size > 0 ? pruned_containers : all_containers
+    end
+
     def container
-      @containers.find { |container| container.detect }
+      detect_containers[0]
     end
 
     # def frameworks

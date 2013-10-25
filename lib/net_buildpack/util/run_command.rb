@@ -22,13 +22,29 @@ module NETBuildpack::Util
   # Run external shell commands, both streaming and logging output
   class RunCommand
 
+  	VARIABLES_REGEX = /\$([a-zA-Z_]+[a-zA-Z0-9_]*)|\$\{(.+)\}/
+  
+  	# Expands variables that contain other variables in the hash.
+  	#
+  	# eg:  expand_variables { "HOME"=>"/home/foo", "CONFIG"=>"$HOME/config", "PATH"=>"/new/path:$PATH"}
+  	#  => { "HOME"=>"/home/foo", "CONFIG"=>"/home/foo/config", "PATH"=>"/new/path:$PATH"}
+	  def self.expand_variables(env)
+	  	env.merge(env) do |key,value| 
+	  		value.gsub(VARIABLES_REGEX) { $1==key ? "$#{key}" : env[$1] } 	
+	  	end
+	  end
+
 		def self.exec(cmd, logger, options = {})
 			options[:silent] ||= false
+			options[:env] ||= {}
+			options[:env] = expand_variables options[:env]
 			exit_value = 0
+			output = "With ENV:\n#{options[:env].inspect}\n\nexec '#{cmd}':\n\n"
+	  	puts cmd unless options[:silent]
 			is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
 			if is_windows then 
 			  require 'open3'
-     	  Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+     	  Open3.popen3(options[:env], cmd) do |stdin, stdout, stderr, wait_thr|
           exit_value = wait_thr.value.to_i
           output = "#{cmd}, exit code: #{exit_value}, output: #{stdout.read}\n#{stderr.read}"
           logger.log output
@@ -36,8 +52,6 @@ module NETBuildpack::Util
         end
 		  else
 	  	  require 'pty'
-	  	  output = "#{cmd} ==>\n\n"
-	  	  puts cmd unless options[:silent]
 	  	  #Wrap bash commands in a script so that PTY.spawn will run them.
 	  	  unless File.exists?(cmd)
 	  	  	cmd_file = Tempfile.new('net_buildpack_run_command.sh')
@@ -47,7 +61,7 @@ module NETBuildpack::Util
 	  	  	cmd = cmd_file.path
 	  	  	File.chmod(0744, cmd)
 	  	  end
-			  PTY.spawn( cmd ) do |stdout_and_err, stdin, pid| 
+			  PTY.spawn(options[:env], cmd ) do |stdout_and_err, stdin, pid| 
 			  	begin
 			      stdout_and_err.each do |line| 
 			      	output += line
