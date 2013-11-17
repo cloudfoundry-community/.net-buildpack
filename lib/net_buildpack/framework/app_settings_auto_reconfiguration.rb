@@ -35,11 +35,13 @@ module NETBuildpack::Framework
     end
 
     def compile
-      vendor_dir = File.join(@app_dir, 'vendor')
-      FileUtils.mkdir_p vendor_dir
+      time_operation "Preparing AppSettingsAutoReconfiguration.exe" do
+        vendor_dir = File.join(@app_dir, 'vendor')
+        FileUtils.mkdir_p vendor_dir
 
-      FileUtils.cp File.join(resources_dir, 'AppSettingsAutoReconfiguration', 'bin', 'AppSettingsAutoReconfiguration.exe'),\
-                   File.join(vendor_dir, 'AppSettingsAutoReconfiguration.exe')
+        FileUtils.cp File.join(resources_dir, 'AppSettingsAutoReconfiguration', 'bin', 'AppSettingsAutoReconfiguration.exe'),\
+                     File.join(vendor_dir, 'AppSettingsAutoReconfiguration.exe')
+      end
     end
 
     def release
