@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'net_buildpack/base_component'
 require 'net_buildpack/container'
 require 'net_buildpack/container/container_utils'
 
@@ -22,22 +23,12 @@ module NETBuildpack::Container
   class ConsoleExeNotFoundError < RuntimeError; end
 
   # Encapsulates the detect, compile, and release functionality for applications running a simple Console .exe
-  # This isn't a _container_ in the traditional sense, but contains the functionality to manage the lifecycle 
+  # This isn't a _container_ in the traditional sense, but contains the functionality to manage the lifecycle of 
   # Console applications.
-  class Console
+  class Console < NETBuildpack::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :mono_home the directory that acts as +MONO_HOME+
-    # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [Hash] :configuration the properties provided by the user
     def initialize(context = {})
-      @app_dir = context[:app_dir]
-      @runtime_command = context[:runtime_command]
-      @lib_directory = context[:lib_directory]
-      @configuration = context[:configuration]
+      super("#{CONTAINER_NAME} container", context)
     end
 
     # Detects whether this application is Console application application.
@@ -47,7 +38,7 @@ module NETBuildpack::Container
       console_executable ? CONTAINER_NAME : nil
     end
 
-    # Does nothing as no transformations are required when running Java +main()+ applications.
+    # Does nothing as no transformations are required when running Console applications.
     #
     # @return [void]
     def compile
@@ -61,7 +52,7 @@ module NETBuildpack::Container
       exe_string = ContainerUtils.space(console_executable)
       arguments_string = ContainerUtils.space(arguments)
 
-      "#{runtime_command}#{exe_string}#{arguments_string}".strip
+      @start_script[:run_command] = "#{runtime_command}#{exe_string}#{arguments_string}".strip
     end
 
     private

@@ -32,8 +32,12 @@ module NETBuildpack
     #
     # @param [Hash] context A shared context provided to all components
     def initialize(component_name, context)
+      
+      context[:start_script] ||= { :init => [], :run_command => "" }
+
       @component_name = component_name
       @context = context
+       
       @context.each { |key, value| instance_variable_set("@#{key}", value) }
       @logger ||= NETBuildpack::Util::NullLogger.new
     end

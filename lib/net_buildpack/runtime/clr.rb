@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'net_buildpack/base_component'
 require 'net_buildpack/runtime'
 require 'net_buildpack/runtime/stack'
 require 'net_buildpack/repository/configured_item'
@@ -24,21 +25,10 @@ require 'net_buildpack/util/tokenized_version'
 module NETBuildpack::Runtime
 
   # Encapsulates the detect, compile, and release functionality for selecting the Windows .NET CLR
-  class CLR
+  class CLR < NETBuildpack::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :runtime_command the command to launch the runtime
-    # @option context [Hash] :config_vars the config vars used to set the environment
-    # @option context [Hash] :configuration the properties provided by the user
-    # @option context [Hash] :diagnostics the diagnostics information provided by the buildpack
     def initialize(context)
-      @config_vars = context[:config_vars] 
-      @app_dir = context[:app_dir]
-      @configuration = context[:configuration]
-      @diagnostics_directory = context[:diagnostics][:directory] # Note this is a relative directory.
+      super('CLR runtime', context)
       @version = CLR.find_clr(@configuration)
 
       #concat seems to be the way to change the param
@@ -61,14 +51,33 @@ module NETBuildpack::Runtime
       
     end
 
-    # Update config_vars
+    # Update config_vars and write start script
     #
     # @return [void]
     def release
+      start_script_path = create_start_script
 
+      start_script_path
     end
 
     private
+
+    def create_start_script
+      start_script = ""
+
+      #Add the init command(s)
+      @context[:start_script][:init].each do |key, value|
+        start_script = [start_script, "\r\n", value].join()
+      end
+
+      #Add the run command
+      start_script = [start_script, "\r\n", @context[:start_script][:run_command]].join()
+
+      start_script_path = File.join(@context[:app_dir], "start.cmd")
+      File.open(start_script_path, 'w') { |f| f.write(start_script) }
+
+      start_script_path
+    end
 
     def self.find_clr(configuration)
       return configuration[:version]

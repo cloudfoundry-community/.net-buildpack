@@ -54,63 +54,75 @@ module NETBuildpack
       FileUtils.rm_rf diagnostics_directory
     end
 
-    it 'should raise an error if more than one container can run an application' do
+    it '[on detect] should return no detections if no runtime can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+
+      detected = with_buildpack { |buildpack| buildpack.detect }
+      expect(detected).to eq([])
+    end
+
+    it '[on detect] should return no detections if no container can run an application' do
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+
+      detected = with_buildpack { |buildpack| buildpack.detect }
+      expect(detected).to eq([])
+    end
+
+    it '[on compile] should raise an error if more than one runtime can run an application' do
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+      stub_runtime2.stub(:detect).and_return('stub-runtime-2')
+
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/More than one runtime can run the application/) }
+    end
+
+    it '[on compile] should raise an error if no container can run an application' do
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/No container can run the application/) }
+    end
+
+    it '[on compile] should raise an error if more than one container can run an application' do
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_container2.stub(:detect).and_return('stub-container-2')
 
-      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/stub-container-1, stub-container-2/) }
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/More than one container can run the application/) }
     end
 
-    it 'should return no detections if no container can run an application' do
-      detected = with_buildpack { |buildpack| buildpack.detect }
-      expect(detected).to be_empty
-    end
-
-    xit 'should raise an error on compile if no container can run an application' do
-      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/No supported application type/) }
-    end
-
-    xit 'should raise an error on release if no container can run an application' do
-      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/No supported application type/) }
-    end
-
-    it 'should call compile on matched components' do
+    it '[on compile] should call compile on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
 
+      stub_runtime1.should_receive(:compile)
+      stub_runtime2.should_not_receive(:compile)      
       stub_container1.should_receive(:compile)
       stub_container2.should_not_receive(:compile)
-      # Frameworks not supported yet
-      # stub_framework1.should_receive(:compile)
-      # stub_framework2.should_not_receive(:compile)
-      stub_runtime1.should_receive(:compile)
-      stub_runtime2.should_not_receive(:compile)
+      stub_framework1.should_receive(:compile)
+      stub_framework2.should_not_receive(:compile)
 
       with_buildpack { |buildpack| buildpack.compile }
     end
 
-    it 'should call release on matched components' do
+    it '[on release] should call release on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
 
-      stub_container1.stub(:release).and_return('test-command')
+      stub_runtime1.stub(:release).and_return('start.sh')
 
       stub_container1.should_receive(:release)
       stub_container2.should_not_receive(:release)
-      # Frameworks not supported yet
-      #stub_framework1.should_receive(:release)
-      #stub_framework2.should_not_receive(:release)
+      stub_framework1.should_receive(:release)
+      stub_framework2.should_not_receive(:release)
       stub_runtime1.should_receive(:release)
       stub_runtime2.should_not_receive(:release)
 
       payload = with_buildpack { |buildpack| buildpack.release }
 
-      expect(payload).to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'test-command' } }.to_yaml)
+      expect(payload).to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'start.sh' } }.to_yaml)
     end
 
-    it 'should write config_vars to profile.d/net_buildpack_env.sh during release' do
+    it '[on release] should write config_vars to profile.d/net_buildpack_env.sh during release' do
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_framework1.stub(:release).and_return(nil)
 
@@ -129,7 +141,7 @@ module NETBuildpack
       end
     end
 
-    it 'should load configuration files matching detected class names' do
+    it '[on detect] should load configuration files matching detected class names' do
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
       File.stub(:exists?).with(/.*buildpack\/hooks.*/).and_return(false)
       File.stub(:exists?).with(File.expand_path('config/stubruntime1.yml')).and_return(true)
@@ -143,12 +155,8 @@ module NETBuildpack
       with_buildpack { |buildpack| buildpack.detect }
     end
 
-    xit 'handles exceptions correctly' do
-      expect { with_buildpack { |buildpack| raise 'an exception' } }.to raise_error SystemExit
-      expect($stderr.string).to match(/an exception/)
-    end
-
-    it 'should call pre_detect and post_detect hook scripts on detect' do
+    it '[on detect] should call pre_detect and post_detect hook scripts on detect' do
+      stub_runtime1.stub(:detect).and_return('stub-runtime-1')
       stub_container1.stub(:detect).and_return('stub-container-1')
 
       with_buildpack { |buildpack| 
@@ -159,7 +167,7 @@ module NETBuildpack
       }
     end
 
-    it 'should call pre_compile and post_compile hook scripts on compile' do
+    it '[on compile] should call pre_compile and post_compile hook scripts on compile' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
@@ -178,7 +186,7 @@ module NETBuildpack
       }
     end
 
-    it 'should call pre_release and post_release hook scripts on release' do
+    it '[on release] should call pre_release and post_release hook scripts on release' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_runtime1.stub(:detect).and_return('stub-runtime-1')
@@ -195,7 +203,7 @@ module NETBuildpack
       }
     end
 
-    #FIXME - need to figure out how to fail is Open3.popen3 isn't called at all
+    #FIXME - need to figure out how to fail if Open3.popen3 isn't called at all
     it 'should run hook script if it exists' do
 
     	NETBuildpack::Util::RunCommand.stub(:exec)\

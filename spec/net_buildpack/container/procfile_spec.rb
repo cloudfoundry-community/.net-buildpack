@@ -41,12 +41,15 @@ module NETBuildpack::Container
         lib_directory = File.join(root, 'vendor')
         Dir.mkdir lib_directory
 
-        command = Procfile.new(
+        start_script = { :init => [], :run_command => "" }
+
+        Procfile.new(
             app_dir: root,
-            lib_directory: lib_directory
+            lib_directory: lib_directory,
+            start_script: start_script
         ).release
 
-        expect(command).to include('/app/vendor/forego start -p $PORT')
+        expect(start_script[:run_command]).to include('/app/vendor/forego start -p $PORT')
       end
     end
 

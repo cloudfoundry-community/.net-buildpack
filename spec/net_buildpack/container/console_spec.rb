@@ -35,14 +35,17 @@ module NETBuildpack::Container
         lib_directory = File.join(root, '.lib')
         Dir.mkdir lib_directory
 
-        run_command = Console.new(
+        start_script = { :init => [], :run_command => "" }
+
+        Console.new(
           app_dir: 'spec/fixtures/integration_valid',
           configuration: { :arguments => '' },
-          runtime_command: '/path/to/mono'
+          runtime_command: '/path/to/mono',
+          :start_script => start_script,
         ).release
 
-        expect(run_command).to_not include('vendor/mono')
-        expect(run_command).to eq('/path/to/mono z-Start.exe')
+        expect(start_script[:run_command]).to_not include('vendor/mono')
+        expect(start_script[:run_command]).to eq('/path/to/mono z-Start.exe')
       end
     end
 

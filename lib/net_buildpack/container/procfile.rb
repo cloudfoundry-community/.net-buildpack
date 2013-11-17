@@ -48,9 +48,7 @@ module NETBuildpack::Container
     end
 
     def release
-      foreman_string = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
-
-      "#{foreman_string}"
+      @start_script[:run_command] = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
     end
 
     private
