@@ -57,47 +57,6 @@ module NETBuildpack::Runtime
         result
     end
 
-    # it 'adds setup_mono to run_command' do
-    #   Dir.mktmpdir do |root|
-    #     NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
-
-    #     run_command = ""
-    #     CLR.new(
-    #         :app_dir => root,
-    #         :runtime_home => '',
-    #         :runtime_command => run_command,
-    #         :config_vars => {},
-    #         :diagnostics => {:directory => 'fake-diagnostics-dir'},
-    #         :configuration => {}
-    #     ).release
-
-    #     expect(run_command).to include("setup_mono")
-    #   end
-    # end
-
-    # it 'adds correct env vars to config_vars ' do
-    #   Dir.mktmpdir do |root|
-    #     NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
-
-    #     config_vars = {}
-    #     Mono.new(
-    #         :app_dir => root,
-    #         :runtime_home => '',
-    #         :runtime_command => '',
-    #         :config_vars => config_vars,
-    #         :diagnostics => {:directory => 'fake-diagnostics-dir'},
-    #         :configuration => {}
-    #     ).release
-
-    #     expect(config_vars["LD_LIBRARY_PATH"]).to include("/app/vendor/mono/lib")
-    #     expect(config_vars["DYLD_LIBRARY_FALLBACK_PATH"]).to include("/app/vendor/mono/lib")
-    #     expect(config_vars["C_INCLUDE_PATH"]).to include("/app/vendor/mono/include")
-    #     expect(config_vars["ACLOCAL_PATH"]).to include("/app/vendor/mono/share/aclocal")
-    #     expect(config_vars["PKG_CONFIG_PATH"]).to include("/app/vendor/mono/lib/pkgconfig")
-    #     expect(config_vars["PATH"]).to include("/app/vendor/mono/bin")
-    #   end
-    # end
-
   end
 
 end

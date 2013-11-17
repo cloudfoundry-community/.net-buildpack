@@ -28,6 +28,9 @@ module NETBuildpack::Runtime
   class CLR < NETBuildpack::BaseComponent
 
     def initialize(context)
+      #defaults
+      context[:start_script] ||= { :init => [], :run => "" }
+
       super('CLR runtime', context)
       @version = CLR.find_clr(@configuration)
 
@@ -66,17 +69,17 @@ module NETBuildpack::Runtime
       start_script = ""
 
       #Add the init command(s)
-      @context[:start_script][:init].each do |key, value|
+      @context[:start_script][:init].each do |value|
         start_script = [start_script, "\r\n", value].join()
       end
 
       #Add the run command
-      start_script = [start_script, "\r\n", @context[:start_script][:run_command]].join()
+      start_script = [start_script, "\r\n", @context[:start_script][:run], "\r\n"].join()
 
       start_script_path = File.join(@context[:app_dir], "start.cmd")
       File.open(start_script_path, 'w') { |f| f.write(start_script) }
 
-      start_script_path
+      start_script_path.gsub! @context[:app_dir], "$HOME"
     end
 
     def self.find_clr(configuration)

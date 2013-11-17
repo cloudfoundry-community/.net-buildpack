@@ -42,8 +42,7 @@ describe 'release script', :integration do
         Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
            exit_value = wait_thr.value
            stdout_value = stdout.read
-           expect(stdout_value).to include('web:')
-           expect(stdout_value).to include('start')
+           expect(stdout_value).to include('web: $HOME/start.sh')
         end
       end
 
