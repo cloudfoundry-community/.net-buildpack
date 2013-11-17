@@ -52,7 +52,7 @@ module NETBuildpack::Container
       exe_string = ContainerUtils.space(console_executable)
       arguments_string = ContainerUtils.space(arguments)
 
-      @start_script[:run_command] = "#{runtime_command}#{exe_string}#{arguments_string}".strip
+      @start_script[:run] = "#{runtime_command}#{exe_string}#{arguments_string}".strip
     end
 
     private

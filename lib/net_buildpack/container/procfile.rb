@@ -48,7 +48,7 @@ module NETBuildpack::Container
     end
 
     def release
-      @start_script[:run_command] = "#{runtime_time_absolute_path('vendor/forego')} start -p $PORT"
+      @start_script[:run] = "$HOME/vendor/forego start -p $PORT"
     end
 
     private

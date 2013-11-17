@@ -35,13 +35,13 @@ module NETBuildpack::Container
       expect(detected).to be_true
     end
 
-    it 'should return forego command' do
+    it 'should have forego as the run command in the startup script' do
       Dir.mktmpdir do |root|
 
         lib_directory = File.join(root, 'vendor')
         Dir.mkdir lib_directory
 
-        start_script = { :init => [], :run_command => "" }
+        start_script = { :init => [], :run => "" }
 
         Procfile.new(
             app_dir: root,
@@ -49,7 +49,7 @@ module NETBuildpack::Container
             start_script: start_script
         ).release
 
-        expect(start_script[:run_command]).to include('/app/vendor/forego start -p $PORT')
+        expect(start_script[:run]).to eq('$HOME/vendor/forego start -p $PORT')
       end
     end
 

@@ -30,12 +30,12 @@ module NETBuildpack::Container
       expect(detected).to eq('console')
     end
 
-    it 'should release correct run_command' do
+    it 'should release correct run command in startup script' do
       Dir.mktmpdir do |root|
         lib_directory = File.join(root, '.lib')
         Dir.mkdir lib_directory
 
-        start_script = { :init => [], :run_command => "" }
+        start_script = { :init => [], :run => "" }
 
         Console.new(
           app_dir: 'spec/fixtures/integration_valid',
@@ -44,8 +44,7 @@ module NETBuildpack::Container
           :start_script => start_script,
         ).release
 
-        expect(start_script[:run_command]).to_not include('vendor/mono')
-        expect(start_script[:run_command]).to eq('/path/to/mono z-Start.exe')
+        expect(start_script[:run]).to eq('/path/to/mono z-Start.exe')
       end
     end
 
