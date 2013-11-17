@@ -31,48 +31,35 @@ module NETBuildpack::Framework
     #
     # @return [String, nil] returns +appsettings_auto_reconfiguration+.
     def detect
+      config_files.any? ? "app_settings_auto_reconfiguration" : nil
     end
 
     def compile
+      vendor_dir = File.join(@app_dir, 'vendor')
+      FileUtils.mkdir_p vendor_dir
+
+      FileUtils.cp File.join(resources_dir, 'AppSettingsAutoReconfiguration', 'bin', 'AppSettingsAutoReconfiguration.exe'),\
+                   File.join(vendor_dir, 'AppSettingsAutoReconfiguration.exe')
     end
 
     def release
-    end
-
-    protected
-
-    def supports?
-      Dir["#{@app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
+      config_files.each do |config_file|
+        file = config_file.gsub! @app_dir, "$HOME" #make relative 
+        @start_script[:init] << "mono $HOME/vendor/AppSettingsAutoReconfiguration.exe #{file}"
+      end  
     end
 
     private
 
-    SPRING_JAR_PATTERN = '*spring-core*.jar'.freeze
-
-    WEB_XML = File.join 'WEB-INF', 'web.xml'.freeze
-
-    def jar_name
-      "#{@parsable_component_name}-#{@version}.jar"
+    def resources_dir
+      File.expand_path(File.join('..', '..', '..', 'resources'), File.dirname(__FILE__))
     end
 
-    def modify_web_xml
-      web_xml = File.join @app_dir, WEB_XML
-
-      if File.exists? web_xml
-        puts '       Modifying /WEB-INF/web.xml for Auto Reconfiguration'
-        @logger.debug { "  Original web.xml: #{File.read web_xml}" }
-
-        modifier = File.open(web_xml) { |file| WebXmlModifier.new(file) }
-        modifier.augment_root_context
-        modifier.augment_servlet_contexts
-
-        File.open(web_xml, 'w') do |file|
-          file.write(modifier.to_s)
-          file.fsync
-        end
-
-        @logger.debug { "  Modified web.xml: #{File.read web_xml}" }
-      end
+    def config_files
+      configs = Dir.glob(File.join( @app_dir, "**", "*.exe.config" ), File::FNM_CASEFOLD) 
+      configs = configs.reject{ |f| f[/.*vshost.*/i] } # don't try to run vshost.exe files
+      configs = configs.reject{ |f| f[/.*vendor.*/i] } # shouldn't use anything below vendor/
+      configs
     end
 
   end
