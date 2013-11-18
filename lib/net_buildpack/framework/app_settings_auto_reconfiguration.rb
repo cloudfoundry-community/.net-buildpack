@@ -48,7 +48,7 @@ module NETBuildpack::Framework
 
     def release
       config_files.each do |config_file|
-        file = config_file.gsub! @app_dir, "$HOME" #make relative 
+        file = config_file.gsub @app_dir, "$HOME" #make relative 
         @start_script[:init] << "mono $HOME/vendor/AppSettingsAutoReconfiguration.exe #{file}"
       end  
     end
@@ -70,9 +70,9 @@ module NETBuildpack::Framework
     def ensure_config_is_lowercase
       config_files.each do |config_file|
         if /Config$/.match( config_file )
-          lowercase_name = config_file.gsub! ".Config", ".config"
+          lowercase_name = config_file.gsub ".Config", ".config"
           FileUtils.mv config_file, lowercase_name
-          puts "      Renaming #{config_file.gsub! @app_dir, ''} to #{lowercase_name.gsub! @app_dir, ''}"
+          puts "      Renaming #{config_file.gsub @app_dir, ''} to #{lowercase_name.gsub @app_dir, ''}"
         end
       end
     end
