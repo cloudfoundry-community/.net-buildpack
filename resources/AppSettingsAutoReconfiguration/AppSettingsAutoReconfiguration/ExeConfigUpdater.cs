@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace AppSettingsAutoReconfiguration
@@ -19,9 +21,11 @@ namespace AppSettingsAutoReconfiguration
 			Configuration config = ConfigurationManager.OpenExeConfiguration( exePath );
 
 			//Replace AppSettings with matching ENV variables
-			foreach (var key in config.AppSettings.Settings.AllKeys) {
+			foreach (var key in config.AppSettings.Settings.AllKeys)
+			{
 				var env_value = Environment.GetEnvironmentVariable (key);
-				if (!string.IsNullOrEmpty (env_value)) {
+				if (!string.IsNullOrEmpty (env_value)) 
+				{
 					config.AppSettings.Settings [key].Value = env_value;
 					Console.WriteLine (string.Format ("Updated AppSetting {0} => ENV[{1}] == {2}", key, key, env_value)); 
 				}
