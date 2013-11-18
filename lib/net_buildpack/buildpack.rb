@@ -97,6 +97,8 @@ module NETBuildpack
     # @return [void]
     def compile
 
+      run_hook('pre_compile')
+
       # Fetch the runtime and container first, 
       # so that any exceptions with too few/many runtimes/containers can be raised
       # before we try do anything else
@@ -104,8 +106,6 @@ module NETBuildpack
       the_container = container
 
       FileUtils.mkdir_p @lib_directory
-
-      run_hook('pre_compile')
 
       run_hook('pre_runtime_compile')
       the_runtime.compile
