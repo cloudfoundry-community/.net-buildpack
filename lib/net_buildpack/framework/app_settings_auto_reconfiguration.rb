@@ -61,6 +61,7 @@ module NETBuildpack::Framework
 
     def config_files
       configs = Dir.glob(File.join( @app_dir, "**", "*.exe.config" ), File::FNM_CASEFOLD) 
+      configs = (configs << Dir.glob(File.join( @app_dir, "**", "Web.config" ), File::FNM_CASEFOLD)).flatten
       configs = configs.reject{ |f| f[/.*vshost.*/i] } # don't try to run vshost.exe files
       configs = configs.reject{ |f| f[/.*vendor.*/i] } # shouldn't use anything below vendor/
       configs

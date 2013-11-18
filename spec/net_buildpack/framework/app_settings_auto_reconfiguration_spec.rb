@@ -26,10 +26,19 @@ module NETBuildpack::Framework
       $stderr = StringIO.new
     end
 
-    it 'should detect with exe.Config' do
+    it 'should detect with exe.config' do
 
       detected = AppSettingsAutoReconfiguration.new(
           app_dir: 'spec/fixtures/sample_commandline_app/bin'
+      ).detect
+
+      expect(detected).to eq('app_settings_auto_reconfiguration')
+    end
+
+    it 'should detect with Web.config' do
+
+      detected = AppSettingsAutoReconfiguration.new(
+          app_dir: 'spec/fixtures/sample_asp_net_mvc'
       ).detect
 
       expect(detected).to eq('app_settings_auto_reconfiguration')
