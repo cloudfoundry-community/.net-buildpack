@@ -21,7 +21,5 @@ runtimes:
 containers:
   - "NETBuildpack::Container::Console"
   - "NETBuildpack::Container::Procfile"
-# frameworks:
-#   - "JavaBuildpack::Framework::JavaOpts"
-#   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
-#   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+frameworks:
+  - "NETBuildpack::Framework::AppSettingsAutoReconfiguration"

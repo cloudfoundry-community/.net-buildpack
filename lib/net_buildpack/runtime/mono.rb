@@ -28,6 +28,12 @@ module NETBuildpack::Runtime
   class Mono < NETBuildpack::BaseComponent
 
     def initialize(context)
+      #defaults
+      context[:start_script] ||= { :init => [], :run => "" }
+      context[:runtime_home] ||= ''
+      context[:runtime_command] ||= ''
+      context[:config_vars] ||= {}
+
       super('Mono runtime', context)
       @version, @uri = Mono.find_mono(@configuration)
 
@@ -58,13 +64,16 @@ module NETBuildpack::Runtime
         sh "ln -s #{stage_time_absolute_path("vendor")} /app/vendor", {:silent => true, :env => @config_vars}
         sh "#{stage_time_absolute_path(mozroots_exe)} --import --sync", {:silent => true, :env => @config_vars}
       end
-  end
+    end
 
-    # Update config_vars
+    # Update config_vars and create the start script
     #
     # @return [void]
     def release
       set_mono_config_vars
+      start_script_path = create_start_script
+
+      start_script_path
     end
 
     private
@@ -80,6 +89,25 @@ module NETBuildpack::Runtime
       @config_vars["PATH"] = "/usr/local/bin:/usr/bin:/bin:$HOME/#{mono_bin}:$PATH"
       @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
       @config_vars["XDG_CONFIG_HOME"] = "$HOME/.config"
+    end
+
+    def create_start_script
+      start_script = "#!/usr/bin/env bash"
+
+      #Add the init command(s)
+      @context[:start_script][:init].each do |value|
+        start_script = [start_script, "\n", value].join()
+      end
+
+      #Add the run command
+      start_script = [start_script, "\n", @context[:start_script][:run], "\n"].join()
+
+      start_script_path = File.join(@context[:app_dir], "start.sh")
+      File.open(start_script_path, 'w') { |f| f.write(start_script) }
+
+      File.chmod(0555, start_script_path) # -r-xr-xr-x -> Read & Execute
+
+      start_script_path.gsub! @context[:app_dir], "$HOME"
     end
 
     def expand(file)

@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry NET Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for Mono repositories
----
-repository_root: "https://ci-labs-buildpack-downloads.s3.amazonaws.com/mono/lucid/x86_64"
-version: 3.2.4_full
+require 'net_buildpack'
+
+# A module encapsulating all of the framework components for the NET buildpack
+module NETBuildpack::Framework
+end

@@ -5,3 +5,4 @@ pkg
 buildpack.log
 spec/fixtures/mem_usage_tests/
 .vagrant
+resources/AppSettingsAutoReconfiguration/packages

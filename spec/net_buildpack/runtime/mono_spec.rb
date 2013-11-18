@@ -42,12 +42,7 @@ module NETBuildpack::Runtime
         NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:linux)
 
         detected = Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :app_dir => root
         ).detect
 
         expect(detected).to eq('mono-3.2.0')
@@ -59,12 +54,7 @@ module NETBuildpack::Runtime
         
         NETBuildpack::Runtime::Stack.stub(:detect_stack).and_return(:windows)
         detected = Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :app_dir => root
           ).detect
         expect(detected).to be_nil
       end
@@ -74,12 +64,7 @@ module NETBuildpack::Runtime
       Dir.mktmpdir do |root|
         
         detected = Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :app_dir => root
         ).compile
 
         mono = File.join(root, 'vendor', 'mono', 'bin', 'mono')
@@ -92,12 +77,7 @@ module NETBuildpack::Runtime
         NETBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
         expect do
           Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :app_dir => root
           ).detect
         end.to raise_error(/Error\ finding\ mono\ version:\ test\ error/)
       end
@@ -121,13 +101,30 @@ module NETBuildpack::Runtime
         end
 
         detected = Mono.new(
-            :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :app_dir => root
         ).compile
+      end
+    end
+
+    it '[on release] creates a valid start.sh' do
+      Dir.mktmpdir do |root|
+
+        Mono.new(
+            :app_dir => root,
+            :start_script => { :init => ["init command 1", "init command 2"], :run => "run command" }
+        ).release
+
+        start_script_path = File.join(root, 'start.sh')
+        expect(File.exists?(start_script_path)).to be_true
+
+        start_script = File.read(start_script_path)
+        expected_start_script = <<EXPECTED_START_SCRIPT
+#!/usr/bin/env bash
+init command 1
+init command 2
+run command
+EXPECTED_START_SCRIPT
+        expect(start_script).to eq(expected_start_script)
       end
     end
 
@@ -137,11 +134,7 @@ module NETBuildpack::Runtime
         run_command = ""
         Mono.new(
             :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => run_command,
-            :config_vars => {},
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :runtime_command => run_command
         ).release
 
         expect(run_command).to include("mono --server")
@@ -154,11 +147,7 @@ module NETBuildpack::Runtime
         config_vars = {}
         Mono.new(
             :app_dir => root,
-            :runtime_home => '',
-            :runtime_command => '',
-            :config_vars => config_vars,
-            :diagnostics => {:directory => 'fake-diagnostics-dir'},
-            :configuration => {}
+            :config_vars => config_vars
         ).release
 
         expect(config_vars["LD_LIBRARY_PATH"]).to include("$HOME/vendor/mono/lib")

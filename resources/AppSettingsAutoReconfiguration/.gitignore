@@ -1,0 +1,31 @@
+#ignore thumbnails created by windows
+Thumbs.db
+#Ignore files build by Visual Studio
+*.obj
+#*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+[Bb]in
+[Oo]bj
+*.sbr
+obj/
+_ReSharper*/
+[Tt]est[Rr]esult*
+.VisualState.xml
+PrecompiledWeb
+*.VisualState.xml
+*.xap
+*.userprefs
