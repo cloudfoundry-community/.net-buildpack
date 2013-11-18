@@ -41,6 +41,8 @@ module NETBuildpack::Framework
 
         FileUtils.cp File.join(resources_dir, 'AppSettingsAutoReconfiguration', 'bin', 'AppSettingsAutoReconfiguration.exe'),\
                      File.join(vendor_dir, 'AppSettingsAutoReconfiguration.exe')
+
+        ensure_config_is_lowercase
       end
     end
 
@@ -64,6 +66,16 @@ module NETBuildpack::Framework
       configs
     end
 
+    #Mono on Linux wants .config, not .Config
+    def ensure_config_is_lowercase
+      config_files.each do |config_file|
+        if /Config$/.match( config_file )
+          lowercase_name = config_file.gsub! ".Config", ".config"
+          FileUtils.mv config_file, lowercase_name
+          puts "      Renaming #{config_file.gsub! @app_dir, ''} to #{lowercase_name.gsub! @app_dir, ''}"
+        end
+      end
+    end
   end
 
 end
