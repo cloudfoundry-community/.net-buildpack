@@ -71,8 +71,8 @@ module NETBuildpack::Framework
       config_files.each do |config_file|
         if /Config$/.match( config_file )
           lowercase_name = config_file.gsub ".Config", ".config"
-          FileUtils.mv config_file, lowercase_name
-          puts "      Renaming #{config_file.gsub @app_dir, ''} to #{lowercase_name.gsub @app_dir, ''}"
+          File.rename(config_file, lowercase_name)
+          puts "      Renamed #{config_file.gsub @app_dir, ''} to #{lowercase_name.gsub @app_dir, ''}"
         end
       end
     end
