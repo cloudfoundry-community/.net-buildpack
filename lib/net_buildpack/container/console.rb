@@ -51,17 +51,15 @@ module NETBuildpack::Container
         raise(ConsoleFoundTooManyExeError, "There are more than 1 potential .exe's that could be run by the Console container - #{exe_configs.inspect}"\
           +"\nYou should only have one .exe.config in #{@app_dir}") 
       end
+
+      puts "-----> Detected console app to be run using '#{start_run_script}'"
     end
 
     # Creates the command to run the Console application.
     #
     # @return [String] the command to run the application.
     def release
-      runtime_command = ContainerUtils.space(@runtime_command)
-      exe_string = ContainerUtils.space(console_executable)
-      arguments_string = ContainerUtils.space(arguments)
-
-      @start_script[:run] = "#{runtime_command}#{exe_string}#{arguments_string}".strip
+      @start_script[:run] = start_run_script
     end
 
     private
@@ -87,6 +85,14 @@ module NETBuildpack::Container
         exe_config = exe_config.gsub /#{@app_dir}\//, '' # make it relative
         exe = exe_config.gsub /.config/i, '' # reference the associated exe
         exe
+      end
+
+      def start_run_script
+        runtime_command = ContainerUtils.space(@runtime_command)
+        exe_string = ContainerUtils.space(console_executable)
+        arguments_string = ContainerUtils.space(arguments)
+
+        "#{runtime_command}#{exe_string}#{arguments_string}".strip
       end
 
   end
