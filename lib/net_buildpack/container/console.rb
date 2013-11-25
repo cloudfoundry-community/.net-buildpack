@@ -21,6 +21,7 @@ require 'net_buildpack/container/container_utils'
 module NETBuildpack::Container
 
   class ConsoleExeNotFoundError < RuntimeError; end
+  class ConsoleFoundTooManyExeError < RuntimeError; end
 
   # Encapsulates the detect, compile, and release functionality for applications running a simple Console .exe
   # This isn't a _container_ in the traditional sense, but contains the functionality to manage the lifecycle of 
@@ -42,6 +43,14 @@ module NETBuildpack::Container
     #
     # @return [void]
     def compile
+      if exe_configs.length == 0
+        raise(ConsoleExeNotFoundError, "Unable to find any exe.config files in #{@app_dir}") 
+      end
+
+      if exe_configs.length > 1
+        raise(ConsoleFoundTooManyExeError, "There are more than 1 potential .exe's that could be run by the Console container - #{exe_configs.inspect}"\
+          +"\nYou should only have one .exe.config in #{@app_dir}") 
+      end
     end
 
     # Creates the command to run the Console application.
@@ -64,12 +73,16 @@ module NETBuildpack::Container
         @configuration[ARGUMENTS_PROPERTY]
       end
 
-      def console_executable
+      def exe_configs
         exe_configs = Dir.glob(File.join( @app_dir, "**", "*.exe.config" ), File::FNM_CASEFOLD) 
         exe_configs = exe_configs.reject{ |f| f[/.*vshost.*/i] } # don't try to run vshost.exe files
         exe_configs = exe_configs.reject{ |f| f[/.*vendor.*/i] } # shouldn't use any .exe's below vendor/
+        exe_configs
+      end
+
+      def console_executable
         exe_config = exe_configs.first  # returns first .exe found, or nil
-        raise(ConsoleExeNotFoundError, "Unable to find any exe.config files in #{@app_dir}") if exe_config.nil?
+        return nil if exe_config.nil?
 
         exe_config = exe_config.gsub /#{@app_dir}\//, '' # make it relative
         exe = exe_config.gsub /.config/i, '' # reference the associated exe
