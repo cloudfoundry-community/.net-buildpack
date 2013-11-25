@@ -48,6 +48,36 @@ module NETBuildpack::Container
       end
     end
 
+    it '[on compile] should raise an exception zero .exe.configs are found' do
+      Dir.mktmpdir do |root|
+
+        expect {
+          Console.new(
+              app_dir: root
+          ).compile
+        }.to raise_error ConsoleExeNotFoundError
+        
+      end
+    end
+
+    it '[on compile] should raise an exception if more than one .exe.config is found' do
+      Dir.mktmpdir do |root|
+        create_exe_config File.join(root, 'one.exe.config')
+        create_exe_config File.join(root, 'two.exe.config')
+
+        expect {
+          Console.new(
+              app_dir: root
+          ).compile
+        }.to raise_error ConsoleFoundTooManyExeError
+        
+      end
+    end
+
+    def create_exe_config(filename)
+      File.open(filename, 'w') { |f| f.write("<!-- stub .exe.config file -->")}
+    end
+
   end
 
 end
