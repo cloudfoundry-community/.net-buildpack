@@ -20,7 +20,7 @@ require 'net_buildpack/runtime/mono'
 
 module NETBuildpack::Runtime
 
-  describe Mono, :focus=>true do
+  describe Mono do
 
     DETAILS = [NETBuildpack::Util::TokenizedVersion.new('3.2.0'), 'test-uri']
 
@@ -178,6 +178,6 @@ EXPECTED_START_SCRIPT
         expect(config_vars["PATH"]).to include("/bin")
       end
     end
-    
+
   end # describe
 end #module
