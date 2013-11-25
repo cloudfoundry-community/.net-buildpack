@@ -86,7 +86,7 @@ module NETBuildpack::Runtime
       @config_vars["PKG_CONFIG_PATH"] = "$HOME/#{File.join(mono_lib,'pkgconfig')}:$PKG_CONFIG_PATH"
       @config_vars["C_INCLUDE_PATH"] = "$HOME/#{File.join(MONO_HOME,'include')}:$C_INCLUDE_PATH"
       @config_vars["ACLOCAL_PATH"] = "$HOME/#{File.join(MONO_HOME,'share','aclocal')}:$ACLOCAL_PATH"
-      @config_vars["PATH"] = "/usr/local/bin:/usr/bin:/bin:$HOME/#{mono_bin}:$PATH"
+      @config_vars["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/#{mono_bin}:$PATH"
       @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
       @config_vars["XDG_CONFIG_HOME"] = "$HOME/.config"
     end
