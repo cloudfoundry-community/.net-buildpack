@@ -155,12 +155,29 @@ EXPECTED_START_SCRIPT
         expect(config_vars["C_INCLUDE_PATH"]).to include("$HOME/vendor/mono/include")
         expect(config_vars["ACLOCAL_PATH"]).to include("$HOME/vendor/mono/share/aclocal")
         expect(config_vars["PKG_CONFIG_PATH"]).to include("$HOME/vendor/mono/lib/pkgconfig")
-        expect(config_vars["PATH"]).to include("/usr/local/bin:/usr/bin:/bin:$HOME/vendor/mono/bin")
+        expect(config_vars["PATH"]).to include("$HOME/vendor/mono/bin")
         expect(config_vars["RUNTIME_COMMAND"]).to include("$HOME/vendor/mono/bin/mono")
         expect(config_vars["XDG_CONFIG_HOME"]).to include("$HOME/.config")
       end
     end
 
-  end
+    it 'should include /usr/local/sbin, /usr/local/bin, /usr/sbin, /usr/bin, /sbin, /bin in the path' do
+      Dir.mktmpdir do |root|
 
-end
+        config_vars = {}
+        Mono.new(
+            :app_dir => root,
+            :config_vars => config_vars
+        ).release
+
+        expect(config_vars["PATH"]).to include("/usr/local/sbin")
+        expect(config_vars["PATH"]).to include("/usr/local/bin")
+        expect(config_vars["PATH"]).to include("/usr/sbin")
+        expect(config_vars["PATH"]).to include("/usr/bin")
+        expect(config_vars["PATH"]).to include("/sbin")
+        expect(config_vars["PATH"]).to include("/bin")
+      end
+    end
+
+  end # describe
+end #module
