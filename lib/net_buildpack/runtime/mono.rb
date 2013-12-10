@@ -21,6 +21,7 @@ require 'net_buildpack/repository/configured_item'
 require 'net_buildpack/util/application_cache'
 require 'net_buildpack/util/format_duration'
 require 'net_buildpack/util/tokenized_version'
+require 'net_buildpack/util/memory_size'
 
 module NETBuildpack::Runtime
 
@@ -89,7 +90,18 @@ module NETBuildpack::Runtime
       @config_vars["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/#{mono_bin}:$PATH"
       @config_vars["RUNTIME_COMMAND"] = "#{runtime_command}"
       @config_vars["XDG_CONFIG_HOME"] = "$HOME/.config"
-      @config_vars["MONO_GC_PARAMS"] = "major=marksweep-par,max-heap-size=36m"
+      @config_vars["MONO_GC_PARAMS"] = "major=marksweep-par,max-heap-size=#{max_heap}"
+    end
+
+    # Returns the max heap memory that can be used, based on ENV['MEMORY_LIMIT']
+    # This is basically the max available memory - 32MB
+    #
+    # @return [MemorySize, nil] the application's max heap memory limit or 512MB if no memory limit has been provided
+    def max_heap
+      memory_limit = ENV['MEMORY_LIMIT'] || "512M"
+      memory_limit_size = NETBuildpack::Util::MemorySize.new(memory_limit) - NETBuildpack::Util::MemorySize.new("32M")
+      fail "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
+      memory_limit_size
     end
 
     def create_start_script
