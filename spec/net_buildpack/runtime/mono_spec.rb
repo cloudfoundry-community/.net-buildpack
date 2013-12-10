@@ -189,7 +189,7 @@ EXPECTED_START_SCRIPT
         ).release
 
         expect(config_vars["MONO_GC_PARAMS"]).to include("major=marksweep-par")
-        expect(config_vars["MONO_GC_PARAMS"]).to include("max-heap-size=480M")
+        expect(config_vars["MONO_GC_PARAMS"]).to include("max-heap-size=464M")
       end
     end
 

@@ -94,12 +94,12 @@ module NETBuildpack::Runtime
     end
 
     # Returns the max heap memory that can be used, based on ENV['MEMORY_LIMIT']
-    # This is basically the max available memory - 32MB
+    # This is basically the max available memory - 48MB
     #
     # @return [MemorySize, nil] the application's max heap memory limit or 512MB if no memory limit has been provided
     def max_heap
       memory_limit = ENV['MEMORY_LIMIT'] || "512M"
-      memory_limit_size = NETBuildpack::Util::MemorySize.new(memory_limit) - NETBuildpack::Util::MemorySize.new("32M")
+      memory_limit_size = NETBuildpack::Util::MemorySize.new(memory_limit) - NETBuildpack::Util::MemorySize.new("48M")
       fail "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
       memory_limit_size
     end
