@@ -179,5 +179,19 @@ EXPECTED_START_SCRIPT
       end
     end
 
+    it 'should set MONO_GC_PARAMS with a limited the max heap size' do
+      Dir.mktmpdir do |root|
+
+        config_vars = {}
+        Mono.new(
+            :app_dir => root,
+            :config_vars => config_vars
+        ).release
+
+        expect(config_vars["MONO_GC_PARAMS"]).to include("major=marksweep-par")
+        expect(config_vars["MONO_GC_PARAMS"]).to include("max-heap-size=464M")
+      end
+    end
+
   end # describe
 end #module
