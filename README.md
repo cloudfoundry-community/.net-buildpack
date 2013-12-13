@@ -22,6 +22,17 @@ This buildpack is in "alpha" stage - that is to say that not all the features ar
 *  ASP.NET MVC support - see [#17](https://github.com/cloudfoundry-community/.net-buildpack/issues/17)
 *  Console apps running under .NET 4.5 / IronFoundry.NET  ( Windows 2012 stack )
 
+## Documentation
+* [Design](docs/design.md)
+* Runtimes
+	* [Mono](docs/runtime-mono.md) (functional)
+	* CLR (coming soon)
+* Containers
+	* [Console](docs/container-console.md)
+	* [Procfile](docs/container-procfile.md)
+* Frameworks
+	* [AppSettingsAutoReconfiguration](docs/framework-app_settings_auto_reconfiguration.md) 
+
 ### Getting involved
 
 We're actively looking for volunteers.  Join us commenting on an existing issue or opening a new one!

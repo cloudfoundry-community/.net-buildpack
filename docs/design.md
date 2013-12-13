@@ -1,14 +1,14 @@
 # Design
 The buildpack is designed as a collection of components.  These components are divided into three types; 
-_CLR Runtimes_, _ProjectTypes_, and _Frameworks_.
+_CLR Runtimes_, _Containers_, and _Frameworks_.
 
 ## CLR Runtimes
 Runtimes represent the CLR implementation (MS.NET or Mono) that will be used when running an application.  This type of component is responsible for determining which CLR should be used, downloading and unpacking that CLR runtime (in the case of Mono on Linux) or ensuring the relevant MS.NET CLR version / profile is installed (in the case of .NET on Windows), and resolving any CLR-specific options that should be used at runtime.
 
 Only a single CLR runtime can be used to run an application.
 
-## Project Types
-Project Types represent the way that an application will be run.  Types range from ASP.NET applications that must be hosted in a webserver to simple `.exe` execution for background workers.  This type of component is responsible for determining which type should be used and producing the command that will be executed by Cloud Foundry at runtime.
+## Containers
+Containers represent the way that an application will be run.  Types range from ASP.NET applications that must be hosted in a webserver to simple `.exe` console apps or background workers.  This type of component is responsible for determining which type should be used and producing the command that will be executed by Cloud Foundry at runtime.
 
 Only a single project type can run an application.
 
