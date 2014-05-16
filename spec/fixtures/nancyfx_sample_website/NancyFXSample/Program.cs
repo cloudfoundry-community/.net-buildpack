@@ -11,15 +11,14 @@ namespace NancyFXSample
 	{
 		public static void Main (string[] args)
 		{
-			var app = CloudFoundry.Mono.Environment.Application ();
-			var uris = app.getFullUris ();
-			var nancyHost = new NancyHost(uris);
+			var uri = new Uri ("http://localhost:" +  System.Configuration.ConfigurationManager.AppSettings ["PORT"]);
+			var nancyHost = new NancyHost(uri);
 
 			nancyHost.Start ();
-			Console.WriteLine ("Nancy Listening to " + String.Join(",", uris.Select (e => e.AbsoluteUri)));
+			Console.WriteLine ("Nancy Listening on " + uri.AbsoluteUri);
 
 			while (1==1) {
-				Thread.Sleep (10);
+				Thread.Sleep (1000);
 			}
 		}
 
