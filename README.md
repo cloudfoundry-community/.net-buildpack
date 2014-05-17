@@ -14,8 +14,8 @@ This buildpack is in "alpha" stage - that is to say that not all the features ar
 
 ##### What already works?
 
-* Console apps running under Mono 3.2.4 on Cloud Foundry ( lucid64 stack )
-* NancyFX web apps running under Mono 3.2.4 on Cloud Foundry ( lucid64 stack )
+* Console apps running under Mono 3.4.0 on Cloud Foundry ( lucid64 stack )
+* NancyFX web apps running under Mono 3.4.0 on Cloud Foundry ( lucid64 stack )
 
 ##### What is next?
 
